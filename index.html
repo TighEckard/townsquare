@@ -122,6 +122,7 @@ button{font-family:inherit;cursor:pointer}
     <button class="tab on" data-tab="board">Board</button>
     <button class="tab" data-tab="calendar">Calendar</button>
     <button class="tab" data-tab="chat">Chat</button>
+    <button class="tab" data-tab="context">Context</button>
     <button class="tab" data-tab="feedback">Feedback</button>
     <button class="tab" data-tab="insights">Insights</button>
   </div>
@@ -158,6 +159,7 @@ async function postAct(action,extra){
   try{var r=await fetch(FN+"/act",{method:"POST",headers:authHeaders(),body:JSON.stringify(body)});return await r.json().catch(function(){return {}})}
   catch(e){return {error:"offline"}}
 }
+var NOTES=[];
 async function fetchData(){
   var t=tok();if(!t)return false;
   var r;
@@ -166,8 +168,10 @@ async function fetchData(){
   if(r.status===401){localStorage.removeItem("ts_token");return false}
   if(!r.ok){el("offline").style.display="block";return "offline"}
   el("offline").style.display="none";
-  DATA=await r.json();
-  el("cnt").textContent="your chief of staff · "+DATA.length+" items";
+  var payload=await r.json();
+  DATA=payload.items||[];
+  NOTES=payload.notes||[];
+  el("cnt").textContent="your chief of staff · "+DATA.length+" items · "+NOTES.length+" notes";
   renderCurrent();
   return true;
 }
@@ -263,7 +267,19 @@ async function submitAddEvent(){
   toast("Added — syncing to Google Calendar…");
   if(TAB==="calendar")renderCalendar();
 }
-function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="feedback")renderFeedback();else renderInsights()}
+function renderContext(){
+  if(!NOTES.length){el("view").innerHTML="<div class=empty>No standalone context yet. Dump facts, updates, or half-thoughts above — anything that doesn't need to be a task lands here instead of cluttering your board.</div>";return}
+  var groups={};var order=[];
+  NOTES.forEach(function(n){var p=n.project||"Other";if(!groups[p]){groups[p]=[];order.push(p)}groups[p].push(n)});
+  var h="<div class=sub style='margin-bottom:14px'>Background knowledge the AI has filed — facts and updates that didn't need to become tasks.</div>";
+  h+=order.map(function(p){
+    return "<div class=daygroup><h4>"+esc(p)+"</h4>"+groups[p].map(function(n){
+      return "<div class=evt><div class=body><div class=title>"+esc(n.text)+"</div><div class=loc>"+new Date(n.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+"</div></div></div>";
+    }).join("")+"</div>";
+  }).join("");
+  el("view").innerHTML=h;
+}
+function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="context")renderContext();else if(TAB==="feedback")renderFeedback();else renderInsights()}
 
 // ---- item detail: view, edit, dispatch ----
 function openDetail(id){
@@ -272,6 +288,7 @@ function openDetail(id){
   var h="<h2 id=dv_title>"+esc(r.title||r.raw_text)+"</h2><div class=kv>"+tag(r.project)+" "+badge(r.status)+" · "+esc(r.type||"")+" · "+esc(r.stakes||"")+(r.due_date?" · due "+String(r.due_date).slice(0,10):"")+"</div>";
   if(r.agent_plan)h+="<div class=kv style='margin-top:8px'>"+doer+"</div>";
   if(r.raw_text&&r.raw_text!==r.title)h+="<div class=rawnote>You sent: "+esc(r.raw_text)+"</div>";
+  if(Array.isArray(r.context_log)&&r.context_log.length){h+="<div class=kv style='margin-top:12px;font-weight:500'>Context learned since:</div>"+r.context_log.map(function(c){return "<div class=rawnote>"+esc(c.text)+"</div>";}).join("");}
   if(r.result)h+="<div class=result>"+esc(r.result)+"</div>";
   h+="<div id=editwrap></div><div class=mact id=mact></div>";
   el("modalCard").innerHTML=h;
