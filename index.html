@@ -97,6 +97,8 @@ button:hover{opacity:.85}
 .evt .loc{font-size:11.5px;color:var(--mut);margin-top:2px}
 .evt .src{font-size:9.5px;color:var(--mut);border:1px solid var(--bd);border-radius:8px;padding:1px 6px;margin-left:6px}
 .calhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.btn.icon.listening{background:#dc2626;color:#fff;border-color:#dc2626;animation:micpulse 1.1s infinite}
+@keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 8px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
 @media(min-width:640px){#modal{align-items:center}#modalCard{border-radius:18px}}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
 </style>
@@ -123,6 +125,7 @@ button:hover{opacity:.85}
   <div id="offline">Can't reach the server right now — showing your last loaded data. Your login is still saved.</div>
   <div class="capbar">
     <input id="cap" placeholder="Dump a thought, task, or idea..."/>
+    <button class="btn icon" id="micgo" title="Voice input">🎤</button>
     <button class="btn icon" id="addgo" title="Add structured task">+</button>
     <button class="btn" id="capgo">Send</button>
   </div>
@@ -339,11 +342,33 @@ async function doComplete(id){await postAct("complete",{id:id});closeDetail();aw
 async function doReopen(id){await postAct("reopen",{id:id});closeDetail();await fetchData();toast("Reopened")}
 async function doCapture(){var t=el("cap").value.trim();if(!t)return;el("cap").value="";toast("Captured — sorting…");await postAct("capture",{text:t});setTimeout(async function(){await fetchData();toast("Sorted")},2600)}
 
+// ---- voice input (Web Speech API — free, on-device, no backend) ----
+var activeRecognition=null;
+function startVoice(targetId,btn){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast("Voice input isn't supported in this browser — try Chrome, or just type.");return}
+  if(activeRecognition){activeRecognition.stop();return}
+  var r=new SR();
+  r.continuous=false;
+  r.interimResults=true;
+  r.lang="en-US";
+  var reset=function(){activeRecognition=null;btn.classList.remove("listening");btn.textContent="🎤"};
+  r.onresult=function(e){
+    var t="";
+    for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;
+    el(targetId).value=t;
+  };
+  r.onend=reset;
+  r.onerror=function(e){reset();if(e.error!=="aborted")toast("Voice input error: "+e.error)};
+  try{r.start();activeRecognition=r;btn.classList.add("listening");btn.textContent="⏹"}
+  catch(e){reset()}
+}
+
 // ---- structured add-task modal ----
 function openAddTask(){
   var projOpts=PROJECTS.map(function(p){return "<option value='"+p+"'>"+p+"</option>"}).join("");
   var h="<h2>Add a task</h2>"+
-    "<div class=field><label>Title</label><input id=at_title placeholder='e.g. Book a dentist appointment'/></div>"+
+    "<div class=field><label>Title</label><div style='display:flex;gap:8px'><input id=at_title placeholder='e.g. Book a dentist appointment' style='flex:1'/><button type=button class='btn icon' id=at_mic title='Voice input' onclick=\"startVoice('at_title',this)\">🎤</button></div></div>"+
     "<div class=row2>"+
       "<div class=field><label>Project</label><select id=at_project>"+projOpts+"</select></div>"+
       "<div class=field><label>Type</label><select id=at_type>"+["task","idea","note","decision","reminder"].map(function(t){return "<option>"+t+"</option>"}).join("")+"</select></div>"+
@@ -369,6 +394,7 @@ async function submitAddTask(){
 // ---- wiring ----
 el("capgo").addEventListener("click",doCapture);
 el("cap").addEventListener("keydown",function(e){if(e.key==="Enter")doCapture()});
+el("micgo").addEventListener("click",function(){startVoice("cap",el("micgo"))});
 el("addgo").addEventListener("click",openAddTask);
 document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;renderCurrent()})});
 el("logout").addEventListener("click",function(){if(confirm("Lock the app? You'll need your password to get back in."))
