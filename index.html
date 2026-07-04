@@ -4,31 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Town Square">
-<meta name="theme-color" content="#6366f1">
+<meta name="theme-color" content="#0f1115">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon.svg">
 <title>Town Square</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-:root{--bg:#f4f5f7;--card:#fff;--bd:#e6e8eb;--tx:#111418;--mut:#6b7280;--ac:#6366f1}
+:root{--bg:#0f1115;--card:#181b21;--card2:#1e222a;--bd:#2a2e37;--tx:#f1f2f4;--mut:#98a0ac;--ac:#818cf8;--acsoft:#2a2b52}
+[data-theme="light"]{--bg:#f4f5f7;--card:#fff;--card2:#f8f9fb;--bd:#e6e8eb;--tx:#111418;--mut:#6b7280;--ac:#6366f1;--acsoft:#eef0ff}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);-webkit-tap-highlight-color:transparent}
 .wrap{max-width:1000px;margin:0 auto;padding:16px 16px 48px}
-.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
 .hdr h1{font-size:20px;margin:0}
 .hdr .sub{color:var(--mut);font-size:12px}
+.hdrbtns{display:flex;gap:6px;flex-shrink:0}
 button{font-family:inherit;cursor:pointer}
 .btn{background:var(--ac);color:#fff;border:0;border-radius:9px;padding:9px 14px;font-size:13px}
-.btn.sec{background:#eef0f2;color:#374151}
+.btn.sec{background:var(--card2);color:var(--tx);border:1px solid var(--bd)}
 .btn.gho{background:transparent;color:var(--mut);border:1px solid var(--bd)}
-.btn:disabled{opacity:.55}
+.btn.icon{padding:9px 11px;background:var(--card2);color:var(--tx);border:1px solid var(--bd)}
+.btn:disabled{opacity:.5}
 .capbar{display:flex;gap:8px;margin-bottom:16px}
-.capbar input{flex:1;padding:12px 14px;border:1px solid var(--bd);border-radius:11px;font-size:15px;font-family:inherit;background:#fff}
-.tabs{display:flex;gap:6px;margin-bottom:16px}
-.tab{padding:7px 14px;border-radius:20px;font-size:13px;background:#fff;border:1px solid var(--bd);color:var(--mut)}
-.tab.on{background:var(--tx);color:#fff;border-color:var(--tx)}
+.capbar input{flex:1;padding:12px 14px;border:1px solid var(--bd);border-radius:11px;font-size:15px;font-family:inherit;background:var(--card);color:var(--tx)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto}
+.tab{padding:7px 14px;border-radius:20px;font-size:13px;background:var(--card);border:1px solid var(--bd);color:var(--mut);white-space:nowrap}
+.tab.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .metric{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
 .metric .n{font-size:26px;font-weight:600;line-height:1}
@@ -40,27 +43,45 @@ button{font-family:inherit;cursor:pointer}
 .item .t{font-size:14px;font-weight:500;line-height:1.3}
 .item .m{font-size:11px;color:var(--mut);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
-.p-ulio{background:#e6f0ff;color:#1d4ed8}.p-next{background:#e7f8f0;color:#047857}.p-personal{background:#f1ecfe;color:#6d28d9}.p-family{background:#fef3e2;color:#b45309}.p-other{background:#eef0f2;color:#4b5563}
+.p-ulio{background:#1d3a6b;color:#93c5fd}.p-next{background:#0f3a2c;color:#6ee7b7}.p-personal{background:#33245e;color:#c4b5fd}.p-family{background:#4a3312;color:#fcd34d}.p-health{background:#3a1730;color:#f9a8d4}.p-platform{background:#1f2937;color:#9ca3af}.p-other{background:#242833;color:#9aa1ac}
+[data-theme="light"] .p-ulio{background:#e6f0ff;color:#1d4ed8}[data-theme="light"] .p-next{background:#e7f8f0;color:#047857}[data-theme="light"] .p-personal{background:#f1ecfe;color:#6d28d9}[data-theme="light"] .p-family{background:#fef3e2;color:#b45309}[data-theme="light"] .p-health{background:#fde7f3;color:#be185d}[data-theme="light"] .p-platform{background:#eef0f2;color:#4b5563}[data-theme="light"] .p-other{background:#eef0f2;color:#4b5563}
 .feed .item{margin-bottom:8px}
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
 .panel{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}
 .panel h3{margin:0 0 8px;font-size:14px;font-weight:600}
 .sub{color:var(--mut);font-size:13px}
 #login{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px}
-#login>div{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:28px;max-width:340px;width:100%}
-#pw{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;margin-bottom:10px;font-family:inherit}
+#login>div{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:28px;max-width:340px;width:100%}
+#pw{width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:8px;font-size:15px;margin-bottom:10px;font-family:inherit;background:var(--card2);color:var(--tx)}
 #go{width:100%;padding:11px;font-size:14px}
-#modal{display:none;position:fixed;inset:0;background:rgba(17,20,24,.45);z-index:50;align-items:flex-end;justify-content:center}
-#modalCard{background:#fff;width:100%;max-width:620px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:20px}
+#offline{display:none;background:#4a3312;color:#fcd34d;font-size:12.5px;padding:8px 12px;border-radius:8px;margin-bottom:12px}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;align-items:flex-end;justify-content:center}
+#modalCard{background:var(--card);width:100%;max-width:620px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:20px}
 #modalCard h2{font-size:17px;margin:0 0 4px;line-height:1.3}
 .kv{font-size:12px;color:var(--mut);margin:2px 0}
-.result{white-space:pre-wrap;font-size:13.5px;line-height:1.55;background:#f8f9fb;border:1px solid var(--bd);border-radius:10px;padding:12px;margin-top:10px}
-.rawnote{font-size:12.5px;color:#4b5563;background:#f8f9fb;border-radius:8px;padding:8px 10px;margin-top:8px;font-style:italic}
+.result{white-space:pre-wrap;font-size:13.5px;line-height:1.55;background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-top:10px}
+.rawnote{font-size:12.5px;color:var(--mut);background:var(--card2);border-radius:8px;padding:8px 10px;margin-top:8px;font-style:italic}
 .mact{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--tx);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none}
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--mut);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+.field input,.field select,.field textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card2);color:var(--tx)}
+.field textarea{resize:vertical;min-height:60px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;z-index:60;pointer-events:none;max-width:88vw;text-align:center}
 #toast.on{opacity:1}
+.chat{display:flex;flex-direction:column;gap:14px}
+.chatgroup{display:flex;flex-direction:column;gap:6px}
+.bubblewrap{display:flex}
+.bubblewrap.you{justify-content:flex-end}
+.bubble{max-width:80%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.4}
+.bubble.you{background:var(--ac);color:#fff;border-bottom-right-radius:4px}
+.bubble.bot{background:var(--card);border:1px solid var(--bd);border-bottom-left-radius:4px}
+.chattime{font-size:10.5px;color:var(--mut);text-align:right;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:var(--card2);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.empty{color:var(--mut);font-size:13px;padding:20px 0;text-align:center}
 @media(min-width:640px){#modal{align-items:center}#modalCard{border-radius:18px}}
-@media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}}
+@media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -71,21 +92,27 @@ button{font-family:inherit;cursor:pointer}
   <div id="lgsub" class="sub" style="margin:4px 0 14px"></div>
   <input id="pw" type="password" placeholder="Password"/>
   <button id="go" class="btn"></button>
-  <div id="msg" style="color:#dc2626;font-size:12px;margin-top:8px;min-height:14px"></div>
+  <div id="msg" style="color:#f87171;font-size:12px;margin-top:8px;min-height:14px"></div>
 </div></div>
 
 <div id="app" style="display:none"><div class="wrap">
   <div class="hdr">
     <div><h1>Town Square</h1><div class="sub" id="cnt"></div></div>
-    <button class="btn sec" id="logout">Lock</button>
+    <div class="hdrbtns">
+      <button class="btn icon" id="themebtn" title="Toggle theme">◐</button>
+      <button class="btn sec" id="logout">Lock</button>
+    </div>
   </div>
+  <div id="offline">Can't reach the server right now — showing your last loaded data. Your login is still saved.</div>
   <div class="capbar">
     <input id="cap" placeholder="Dump a thought, task, or idea..."/>
+    <button class="btn icon" id="addgo" title="Add structured task">+</button>
     <button class="btn" id="capgo">Send</button>
   </div>
   <div class="tabs">
     <button class="tab on" data-tab="board">Board</button>
-    <button class="tab" data-tab="feed">All activity</button>
+    <button class="tab" data-tab="chat">Chat</button>
+    <button class="tab" data-tab="feedback">Feedback</button>
     <button class="tab" data-tab="insights">Insights</button>
   </div>
   <div id="view"></div>
@@ -97,23 +124,45 @@ button{font-family:inherit;cursor:pointer}
 <script>
 var FN="https://enrybarwjcqpibiqactn.supabase.co/functions/v1";
 var DATA=[];var TAB="board";var MODE="login";var chart1=null,chart2=null;
+var PROJECTS=["Ulio","Next venture","Personal","Family","Health","Platform","Other"];
 function el(i){return document.getElementById(i)}
 function tok(){return localStorage.getItem("ts_token")}
 function show(v){el("login").style.display=v==="login"?"flex":"none";el("app").style.display=v==="app"?"block":"none"}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
-function toast(m){var t=el("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},2200)}
-function pcls(p){return p==="Ulio"?"p-ulio":p==="Next venture"?"p-next":p==="Personal"?"p-personal":p==="Family"?"p-family":"p-other"}
+function toast(m){var t=el("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},2400)}
+function pcls(p){var m={"Ulio":"p-ulio","Next venture":"p-next","Personal":"p-personal","Family":"p-family","Health":"p-health","Platform":"p-platform"};return m[p]||"p-other"}
 var OPENS=["captured","triaged","agent_working","needs_you"];
 function isOpen(r){return OPENS.indexOf(r.status)>=0}
-function statusInfo(s){var m={captured:["New","#6b7280","#f1f0ec"],triaged:["To do","#1d4ed8","#e6f0ff"],agent_working:["Working","#b45309","#fef3e2"],needs_you:["Review","#047857","#e7f8f0"],done:["Done","#6b7280","#eef0f2"]};return m[s]||["",""]}
+function statusInfo(s){var m={captured:["New","#9aa1ac","#242833"],triaged:["To do","#93c5fd","#1d3a6b"],agent_working:["Working","#fcd34d","#4a3312"],needs_you:["Review","#6ee7b7","#0f3a2c"],done:["Done","#9aa1ac","#242833"]};return m[s]||["",""]}
 function badge(s){var b=statusInfo(s);return "<span class=badge style='background:"+b[2]+";color:"+b[1]+"'>"+b[0]+"</span>"}
-function tag(p){return "<span class='tag "+pcls(p)+"'>"+esc(p)+"</span>"}
+function tag(p){return "<span class='tag "+pcls(p)+"'>"+esc(p||"Other")+"</span>"}
 
-async function authHeaders(){return {authorization:"Bearer "+tok(),"content-type":"application/json"}}
-async function postAct(action,extra){var body=Object.assign({action:action},extra||{});var r=await fetch(FN+"/act",{method:"POST",headers:await authHeaders(),body:JSON.stringify(body)});return await r.json().catch(function(){return {}})}
-async function fetchData(){var r=await fetch(FN+"/data",{headers:{authorization:"Bearer "+tok()}});if(r.status===401){localStorage.removeItem("ts_token");location.reload();return}DATA=await r.json();el("cnt").textContent="your chief of staff · "+DATA.length+" items";renderCurrent()}
+// ---- theme ----
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);el("themebtn").textContent=t==="dark"?"◐":"◑"}
+(function(){var t=localStorage.getItem("ts_theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();
 
-function itemCard(r){return "<div class=item onclick=\"openDetail('"+r.id+"')\"><div class=t>"+esc(r.title||r.raw_text)+"</div><div class=m>"+tag(r.project||"Other")+badge(r.status)+"<span>"+esc(r.stakes||"")+(r.due_date?" · due "+String(r.due_date).slice(0,10):"")+"</span></div></div>"}
+// ---- auth / data (robust: only a real 401 clears the saved login) ----
+function authHeaders(){return {authorization:"Bearer "+tok(),"content-type":"application/json"}}
+async function postAct(action,extra){
+  var body=Object.assign({action:action},extra||{});
+  try{var r=await fetch(FN+"/act",{method:"POST",headers:authHeaders(),body:JSON.stringify(body)});return await r.json().catch(function(){return {}})}
+  catch(e){return {error:"offline"}}
+}
+async function fetchData(){
+  var t=tok();if(!t)return false;
+  var r;
+  try{r=await fetch(FN+"/data",{headers:{authorization:"Bearer "+t}})}
+  catch(e){el("offline").style.display="block";return "offline"}
+  if(r.status===401){localStorage.removeItem("ts_token");return false}
+  if(!r.ok){el("offline").style.display="block";return "offline"}
+  el("offline").style.display="none";
+  DATA=await r.json();
+  el("cnt").textContent="your chief of staff · "+DATA.length+" items";
+  renderCurrent();
+  return true;
+}
+
+function itemCard(r){return "<div class=item onclick=\"openDetail('"+r.id+"')\"><div class=t>"+esc(r.title||r.raw_text)+"</div><div class=m>"+tag(r.project)+badge(r.status)+"<span>"+esc(r.stakes||"")+(r.due_date?" · due "+String(r.due_date).slice(0,10):"")+"</span></div></div>"}
 
 function renderBoard(){
   var open=DATA.filter(isOpen);var agent=open.filter(function(r){return r.agent_doable});var mine=open.filter(function(r){return !r.agent_doable});
@@ -126,31 +175,51 @@ function renderBoard(){
   if(done.length)h+="<div class=col style='margin-top:18px'><h4>Done ("+done.length+")</h4>"+done.slice(0,8).map(itemCard).join("")+"</div>";
   el("view").innerHTML=h;
 }
-function renderFeed(){
-  if(!DATA.length){el("view").innerHTML="<div class=sub>No items yet. Dump a thought above to get started.</div>";return}
-  el("view").innerHTML="<div class=feed>"+DATA.map(itemCard).join("")+"</div>";
+function renderFeedback(){
+  var items=DATA.filter(function(r){return r.project==="Platform"});
+  var h="<div class=panel><h3>Feature requests &amp; feedback about this app</h3><div class=sub>Dump anything you want changed about Town Square itself — a new field, a different layout, a new integration. It lands here so it doesn't get lost, and gets reviewed and shipped in upcoming updates.</div></div>";
+  h+=items.length?items.map(itemCard).join(""):"<div class=empty>Nothing logged yet.</div>";
+  el("view").innerHTML=h;
 }
 function renderInsights(){
   var open=DATA.filter(isOpen);var agent=open.filter(function(r){return r.agent_doable}).length;var mine=open.length-agent;
   el("view").innerHTML="<div class=panel><h3>Who acts on it</h3><canvas id=c1 height=150></canvas></div><div class=panel><h3>Open items by project</h3><canvas id=c2 height=150></canvas></div>";
   if(chart1)chart1.destroy();if(chart2)chart2.destroy();
-  chart1=new Chart(el("c1"),{type:"doughnut",data:{labels:["Agent can handle","Your calls"],datasets:[{data:[agent,mine],backgroundColor:["#10b981","#8b5cf6"],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:"bottom"}}}});
-  var PC={Ulio:"#3b82f6","Next venture":"#10b981",Personal:"#8b5cf6",Family:"#f59e0b",Other:"#6b7280"};
-  var ps=Object.keys(PC).filter(function(p){return open.some(function(r){return (r.project||"Other")===p})});
-  chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(p){return PC[p]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  chart1=new Chart(el("c1"),{type:"doughnut",data:{labels:["Agent can handle","Your calls"],datasets:[{data:[agent,mine],backgroundColor:["#10b981","#8b5cf6"],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{color:getComputedStyle(document.body).color}}}}});
+  var ps=Array.from(new Set(open.map(function(r){return r.project||"Other"})));
+  var COLORS=["#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#6b7280","#ef4444"];
+  chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(_,i){return COLORS[i%COLORS.length]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:getComputedStyle(document.body).color}},x:{ticks:{color:getComputedStyle(document.body).color}}}}});
 }
-function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="feed")renderFeed();else renderInsights()}
+function renderChat(){
+  if(!DATA.length){el("view").innerHTML="<div class=empty>No messages yet. Dump a thought above, or text the Telegram bot.</div>";return}
+  var groups={};var order=[];
+  DATA.forEach(function(r){var key=(r.raw_text||r.title||"")+"|"+String(r.created_at).slice(0,16);if(!groups[key]){groups[key]=[];order.push(key)}groups[key].push(r)});
+  var arr=order.map(function(k){var items=groups[k];return {items:items,created_at:items[0].created_at,raw:items[0].raw_text||items[0].title}});
+  arr.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});
+  var h=arr.map(function(g){
+    var when=new Date(g.created_at).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    var src=g.items[0].source||"";
+    var you="<div class=bubblewrap you><div class='bubble you'>"+esc(g.raw)+"</div></div><div class=chattime>"+esc(when)+(src?" · "+esc(src):"")+"</div>";
+    var chips=g.items.map(function(it){return "<div class=chip onclick=\"openDetail('"+it.id+"')\">"+esc(it.title||it.raw_text)+" "+badge(it.status)+"</div>"}).join("");
+    var bot="<div class=bubblewrap><div class='bubble bot'>Sorted into:<div class=chips>"+chips+"</div></div></div>";
+    return "<div class=chatgroup>"+you+bot+"</div>";
+  }).join("");
+  el("view").innerHTML="<div class=chat>"+h+"</div>";
+}
+function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="chat")renderChat();else if(TAB==="feedback")renderFeedback();else renderInsights()}
 
+// ---- item detail: view, edit, dispatch ----
 function openDetail(id){
   var r=DATA.filter(function(x){return String(x.id)===String(id)})[0];if(!r)return;
   var doer=r.agent_doable?"🤖 "+esc(r.agent_plan||""):"👤 "+esc(r.agent_plan||"");
-  var h="<h2>"+esc(r.title||r.raw_text)+"</h2><div class=kv>"+tag(r.project||"Other")+" "+badge(r.status)+" · "+esc(r.type||"")+" · "+esc(r.stakes||"")+(r.due_date?" · due "+String(r.due_date).slice(0,10):"")+"</div>";
+  var h="<h2 id=dv_title>"+esc(r.title||r.raw_text)+"</h2><div class=kv>"+tag(r.project)+" "+badge(r.status)+" · "+esc(r.type||"")+" · "+esc(r.stakes||"")+(r.due_date?" · due "+String(r.due_date).slice(0,10):"")+"</div>";
   if(r.agent_plan)h+="<div class=kv style='margin-top:8px'>"+doer+"</div>";
   if(r.raw_text&&r.raw_text!==r.title)h+="<div class=rawnote>You sent: "+esc(r.raw_text)+"</div>";
   if(r.result)h+="<div class=result>"+esc(r.result)+"</div>";
-  h+="<div class=mact id=mact></div>";
+  h+="<div id=editwrap></div><div class=mact id=mact></div>";
   el("modalCard").innerHTML=h;
   var acts=el("mact");var btns="";
+  btns+="<button class='btn gho' onclick=\"toggleEdit('"+r.id+"')\">Edit</button>";
   if(r.status==="done"){btns+="<button class='btn gho' onclick=\"doReopen('"+r.id+"')\">Reopen</button>";}
   else{
     if(r.agent_doable)btns+="<button class=btn id=dispbtn onclick=\"doDispatch('"+r.id+"')\">"+(r.result?"Re-run agent":"Dispatch agent")+"</button>";
@@ -160,21 +229,98 @@ function openDetail(id){
   acts.innerHTML=btns;
   el("modal").style.display="flex";
 }
+function toggleEdit(id){
+  var r=DATA.filter(function(x){return String(x.id)===String(id)})[0];if(!r)return;
+  var w=el("editwrap");
+  if(w.dataset.open==="1"){w.innerHTML="";w.dataset.open="0";return}
+  w.dataset.open="1";
+  var projOpts=PROJECTS.map(function(p){return "<option "+(p===r.project?"selected":"")+" value='"+p+"'>"+p+"</option>"}).join("");
+  w.innerHTML="<div style='margin-top:12px;border-top:1px solid var(--bd);padding-top:12px'>"+
+    "<div class=field><label>Title</label><input id=ed_title value=\""+esc(r.title||r.raw_text||"")+"\"/></div>"+
+    "<div class=row2>"+
+      "<div class=field><label>Project</label><select id=ed_project>"+projOpts+"</select></div>"+
+      "<div class=field><label>Stakes</label><select id=ed_stakes>"+["low","medium","high","money"].map(function(s){return "<option "+(s===r.stakes?"selected":"")+">"+s+"</option>"}).join("")+"</select></div>"+
+    "</div>"+
+    "<button class=btn onclick=\"saveEdit('"+r.id+"')\">Save changes</button>"+
+    "</div>";
+}
+async function saveEdit(id){
+  var patch={id:id,title:el("ed_title").value,project:el("ed_project").value,stakes:el("ed_stakes").value};
+  await postAct("update",patch);
+  await fetchData();
+  toast("Saved");
+  openDetail(id);
+}
 function closeDetail(){el("modal").style.display="none"}
 async function doDispatch(id){var b=el("dispbtn");if(b){b.disabled=true;b.textContent="Agent working… (up to a minute)"}var res=await postAct("dispatch",{id:id});await fetchData();if(res&&res.error){toast("Agent could not finish")}else{toast("Agent finished")}openDetail(id)}
 async function doComplete(id){await postAct("complete",{id:id});closeDetail();await fetchData();toast("Marked done")}
 async function doReopen(id){await postAct("reopen",{id:id});closeDetail();await fetchData();toast("Reopened")}
 async function doCapture(){var t=el("cap").value.trim();if(!t)return;el("cap").value="";toast("Captured — sorting…");await postAct("capture",{text:t});setTimeout(async function(){await fetchData();toast("Sorted")},2600)}
 
+// ---- structured add-task modal ----
+function openAddTask(){
+  var projOpts=PROJECTS.map(function(p){return "<option value='"+p+"'>"+p+"</option>"}).join("");
+  var h="<h2>Add a task</h2>"+
+    "<div class=field><label>Title</label><input id=at_title placeholder='e.g. Book a dentist appointment'/></div>"+
+    "<div class=row2>"+
+      "<div class=field><label>Project</label><select id=at_project>"+projOpts+"</select></div>"+
+      "<div class=field><label>Type</label><select id=at_type>"+["task","idea","note","decision","reminder"].map(function(t){return "<option>"+t+"</option>"}).join("")+"</select></div>"+
+    "</div>"+
+    "<div class=row2>"+
+      "<div class=field><label>Stakes</label><select id=at_stakes>"+["low","medium","high","money"].map(function(s){return "<option>"+s+"</option>"}).join("")+"</select></div>"+
+      "<div class=field><label>Due date (optional)</label><input id=at_due type=date/></div>"+
+    "</div>"+
+    "<div class=field><label>Can an agent do this for you?</label><select id=at_agent><option value=false>No — this needs you</option><option value=true>Yes — dispatch-able</option></select></div>"+
+    "<div class=mact><button class=btn onclick=submitAddTask()>Add task</button><button class='btn gho' onclick=closeDetail()>Cancel</button></div>";
+  el("modalCard").innerHTML=h;
+  el("modal").style.display="flex";
+}
+async function submitAddTask(){
+  var title=el("at_title").value.trim();if(!title){toast("Give it a title");return}
+  var body={title:title,project:el("at_project").value,type:el("at_type").value,stakes:el("at_stakes").value,due_date:el("at_due").value||null,agent_doable:el("at_agent").value==="true"};
+  await postAct("addTask",body);
+  closeDetail();
+  await fetchData();
+  toast("Task added");
+}
+
+// ---- wiring ----
 el("capgo").addEventListener("click",doCapture);
 el("cap").addEventListener("keydown",function(e){if(e.key==="Enter")doCapture()});
+el("addgo").addEventListener("click",openAddTask);
 document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;renderCurrent()})});
-el("logout").addEventListener("click",function(){localStorage.removeItem("ts_token");location.reload()});
+el("logout").addEventListener("click",function(){if(confirm("Lock the app? You'll need your password to get back in."))
+  {localStorage.removeItem("ts_token");location.reload()}});
+el("themebtn").addEventListener("click",function(){var cur=document.documentElement.getAttribute("data-theme");var next=cur==="dark"?"light":"dark";localStorage.setItem("ts_theme",next);applyTheme(next);if(TAB==="insights")renderInsights()});
 el("modal").addEventListener("click",function(e){if(e.target===el("modal"))closeDetail()});
 
-async function post(action,password){var r=await fetch(FN+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:action,password:password})});var d=await r.json().catch(function(){return {}});return {ok:r.ok,data:d}}
-async function submit(){var pw=el("pw").value;if(pw.length<4){el("msg").textContent="At least 4 characters";return}el("msg").textContent="working…";var res=await post(MODE,pw);if(res.ok&&res.data.token){localStorage.setItem("ts_token",res.data.token);el("msg").textContent="";show("app");await fetchData()}else{el("msg").textContent=res.data.error||"Failed"}}
-async function boot(){if(tok()){show("app");await fetchData();return}var s=await post("status","");MODE=(s.data&&s.data.configured)?"login":"setup";el("lgtitle").textContent=MODE==="setup"?"Create a password":"Welcome back";el("lgsub").textContent=MODE==="setup"?"Set a password to lock your Town Square. You only enter it once on this device.":"Enter your password to unlock.";el("go").textContent=MODE==="setup"?"Create and open":"Unlock";show("login")}
+async function post(action,password){
+  try{var r=await fetch(FN+"/auth",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:action,password:password})});var d=await r.json().catch(function(){return {}});return {ok:r.ok,data:d}}
+  catch(e){return {ok:false,data:{error:"Can't reach the server. Check your connection."}}}
+}
+async function submit(){var pw=el("pw").value;if(pw.length<4){el("msg").textContent="At least 4 characters";return}el("msg").textContent="working…";var res=await post(MODE,pw);if(res.ok&&res.data.token){localStorage.setItem("ts_token",res.data.token);el("msg").textContent="";show("app");applyTheme(localStorage.getItem("ts_theme")||"dark");await fetchData()}else{el("msg").textContent=res.data.error||"Failed"}}
+async function boot(){
+  applyTheme(localStorage.getItem("ts_theme")||"dark");
+  if(tok()){
+    show("app");
+    var res=await fetchData();
+    if(res===false){ // real 401 — token was invalid/expired, need fresh login
+      var s=await post("status","");
+      MODE="login";
+      el("lgtitle").textContent="Session expired";
+      el("lgsub").textContent="Enter your password to unlock again.";
+      el("go").textContent="Unlock";
+      show("login");
+    }
+    return;
+  }
+  var s=await post("status","");
+  MODE=(s.data&&s.data.configured)?"login":"setup";
+  el("lgtitle").textContent=MODE==="setup"?"Create a password":"Welcome back";
+  el("lgsub").textContent=MODE==="setup"?"Set a password to lock your Town Square. You only enter it once on this device — it's remembered from then on.":"Enter your password to unlock.";
+  el("go").textContent=MODE==="setup"?"Create and open":"Unlock";
+  show("login");
+}
 el("go").addEventListener("click",submit);
 el("pw").addEventListener("keydown",function(e){if(e.key==="Enter")submit()});
 boot();
