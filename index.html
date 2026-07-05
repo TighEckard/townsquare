@@ -102,6 +102,11 @@ button:hover{opacity:.85}
 .calhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .btn.icon.listening{background:#dc2626;color:#fff;border-color:#dc2626;animation:micpulse 1.1s infinite}
 @keyframes micpulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 8px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.agentstrip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.apill{display:flex;align-items:center;gap:5px;font-size:11px;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;color:var(--mut);white-space:nowrap}
+.apill .d{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
+.apill.busy{color:var(--tx);border-color:var(--ac)}
+.apill.busy .d{background:#fcd34d;animation:pulse 1.4s infinite}
 .pipeline{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
 .pstage{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:11px;padding:11px 14px}
 .pstage .pname{font-size:13.5px;font-weight:500;flex:1}
@@ -156,11 +161,10 @@ button:hover{opacity:.85}
     <button class="tab on" data-tab="board">Board</button>
     <button class="tab" data-tab="calendar">Calendar</button>
     <button class="tab" data-tab="chat">Chat</button>
-    <button class="tab" data-tab="context">Context</button>
-    <button class="tab" data-tab="system">System</button>
+    <button class="tab" data-tab="mind">Mind</button>
     <button class="tab" data-tab="feedback">Feedback</button>
-    <button class="tab" data-tab="insights">Insights</button>
   </div>
+  <div id="agentstrip" class="agentstrip"></div>
   <div id="view"></div>
 </div></div>
 
@@ -233,21 +237,6 @@ function renderFeedback(){
   h+=items.length?items.map(itemCard).join(""):"<div class=empty>Nothing logged yet.</div>";
   el("view").innerHTML=h;
 }
-function renderInsights(){
-  var open=DATA.filter(isOpen);var agent=open.filter(function(r){return r.agent_doable}).length;var mine=open.length-agent;
-  var booksHtml="";
-  if(BOOKS.length){
-    booksHtml="<div class=panel><h3>The library — what the AI currently understands</h3><div class=sub style='margin-bottom:10px'>Refreshed automatically by the reflection pass, not by you.</div>"+
-      BOOKS.map(function(b){return "<div style='margin-bottom:10px'><div style='font-weight:500;font-size:13px'>"+esc(b.project)+"</div><div class=sub style='font-size:12.5px'>"+esc(b.summary||"(no summary yet)")+"</div></div>";}).join("")+
-      "</div>";
-  }
-  el("view").innerHTML=booksHtml+"<div class=panel><h3>Who acts on it</h3><canvas id=c1 height=150></canvas></div><div class=panel><h3>Open items by project</h3><canvas id=c2 height=150></canvas></div>";
-  if(chart1)chart1.destroy();if(chart2)chart2.destroy();
-  chart1=new Chart(el("c1"),{type:"doughnut",data:{labels:["Agent can handle","Your calls"],datasets:[{data:[agent,mine],backgroundColor:["#10b981","#8b5cf6"],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{color:getComputedStyle(document.body).color}}}}});
-  var ps=Array.from(new Set(open.map(function(r){return r.project||"Other"})));
-  var COLORS=["#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#6b7280","#ef4444"];
-  chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(_,i){return COLORS[i%COLORS.length]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:getComputedStyle(document.body).color}},x:{ticks:{color:getComputedStyle(document.body).color}}}}});
-}
 function renderChat(){
   if(!DATA.length){el("view").innerHTML="<div class=empty>No messages yet. Dump a thought above, or text the Telegram bot.</div>";return}
   var groups={};var order=[];
@@ -311,33 +300,97 @@ async function submitAddEvent(){
   toast("Added — syncing to Google Calendar…");
   if(TAB==="calendar")renderCalendar();
 }
-function renderContext(){
-  if(!NOTES.length){el("view").innerHTML="<div class=empty>No standalone context yet. Dump facts, updates, or half-thoughts above — anything that doesn't need to be a task lands here instead of cluttering your board.</div>";return}
-  var groups={};var order=[];
-  NOTES.forEach(function(n){var p=n.project||"Other";if(!groups[p]){groups[p]=[];order.push(p)}groups[p].push(n)});
-  var h="<div class=sub style='margin-bottom:14px'>Background knowledge the AI has filed — facts and updates that didn't need to become tasks.</div>";
-  h+=order.map(function(p){
-    return "<div class=daygroup><h4>"+esc(p)+"</h4>"+groups[p].map(function(n){
-      return "<div class=evt><div class=body><div class=title>"+esc(n.text)+"</div><div class=loc>"+new Date(n.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+"</div></div></div>";
-    }).join("")+"</div>";
-  }).join("");
-  el("view").innerHTML=h;
-}
 var SYS=null;
-async function fetchSystem(){var r;try{r=await fetch(FN+"/system-status",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;SYS=await r.json();return SYS}
+async function fetchSystem(){var r;try{r=await fetch(FN+"/system-status",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;SYS=await r.json();renderAgentStrip();return SYS}
 function timeAgo(iso){if(!iso)return "never";var s=(Date.now()-new Date(iso).getTime())/1000;if(s<60)return "just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
-var JOB_META={
-  "triage-every-minute":{name:"Triage",desc:"sorts every dump — context vs. new task",dot:"live"},
-  "reflection-twice-daily":{name:"Reflection",desc:"reviews everything, reminds you of open decisions",dot:"live"},
-  "goal-pursuit-daily":{name:"Goal pursuit",desc:"researches your standing goals, proposes next steps",dot:"live"}
-};
-var FN_NAME={"triage":"Triage","reflection":"Reflection","goal-pursuit":"Goal pursuit","dispatch":"Dispatch (agent working)","browser-worker":"🌐 Browser worker"};
-function renderSystem(){
-  el("view").innerHTML="<div class=empty>Loading live system status…</div>";
+var AGENTS=[
+  {fn:"triage",name:"Triage",desc:"sorts every dump — context vs. new task",jobname:"triage-every-minute"},
+  {fn:"reflection",name:"Reflection",desc:"reviews everything, reminds you of open decisions",jobname:"reflection-twice-daily"},
+  {fn:"goal-pursuit",name:"Goal pursuit",desc:"researches your standing goals, proposes next steps",jobname:"goal-pursuit-daily"},
+  {fn:"browser-worker",name:"🌐 Browser worker",desc:"every 15 min — drives real Chrome, asks before any send/order/submit"},
+  {fn:"dispatch",name:"Dispatch",desc:"runs when you tap an agent-doable item"},
+];
+function renderAgentStrip(){
+  var strip=el("agentstrip");if(!strip)return;
+  if(!SYS){strip.innerHTML="";return}
+  var runningFns={};(SYS.running||[]).forEach(function(r){runningFns[r.fn]=r});
+  strip.innerHTML=AGENTS.map(function(a){
+    var r=runningFns[a.fn];
+    if(r)return "<div class='apill busy' title=\""+esc(r.detail||"")+"\"><span class=d></span>"+esc(a.name)+"…</div>";
+    return "<div class=apill title='idle'><span class=d></span>"+esc(a.name)+"</div>";
+  }).join("");
+}
+function renderMind(){
+  el("view").innerHTML="<div class=empty>Loading…</div>";
   fetchSystem().then(function(sys){
-    if(TAB!=="system")return;
-    if(!sys){el("view").innerHTML="<div class=empty>Couldn't load system status.</div>";return}
-    var h="<div class=panel><h3>How it actually works</h3><div class=sub style='margin-bottom:12px'>The real pipeline, live — not a mockup.</div>";
+    if(TAB!=="mind")return;
+    if(!sys){el("view").innerHTML="<div class=empty>Couldn't load. Check your connection.</div>";return}
+    var h="";
+
+    // 1. Live agents — organized per-agent, not a flat log. This is the "watch it work" view.
+    var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
+    var runsByFn={};(sys.runs||[]).forEach(function(r){(runsByFn[r.fn]=runsByFn[r.fn]||[]).push(r)});
+    var jobsByName={};(sys.jobs||[]).forEach(function(j){jobsByName[j.jobname]=j});
+    h+="<div class=panel><h3>🧠 Live agents</h3><div class=sub style='margin-bottom:10px'>What's running right now, and what each one did last.</div>";
+    AGENTS.forEach(function(a){
+      var running=runningFns[a.fn];
+      var hist=runsByFn[a.fn]||[];
+      var job=a.jobname?jobsByName[a.jobname]:null;
+      var statusLine=running?("⏳ Running — "+esc(running.detail||"")+" · started "+timeAgo(running.started_at)):
+        (hist[0]?("🟢 Idle — last: "+esc(hist[0].detail||"")+" · "+timeAgo(hist[0].started_at)):"🟢 Idle — no runs logged yet");
+      var cronLine=job?("cron ticking · last checked "+timeAgo(job.last_run_at)):"";
+      h+="<div class=jobcard style='align-items:flex-start'><div style='flex:1'>"+
+        "<div class=jname>"+esc(a.name)+"</div><div class=jmeta>"+esc(a.desc)+"</div>"+
+        "<div class=jmeta style='margin-top:6px;color:var(--tx)'>"+statusLine+"</div>"+
+        (hist.length>1?("<div class=jmeta style='margin-top:4px'>"+hist.slice(1,3).map(function(r){return timeAgo(r.started_at)+": "+esc(r.detail||"");}).join(" · ")+"</div>"):"")+
+        (cronLine?("<div class=jmeta style='margin-top:4px;opacity:.7'>"+cronLine+"</div>"):"")+
+        "</div></div>";
+    });
+    h+="</div>";
+
+    // 2. Standing goals
+    if(sys.goals&&sys.goals.length){
+      h+="<div class=panel><h3>🎯 Standing goals</h3>";
+      sys.goals.forEach(function(g){h+="<div class=jobcard><div><div class=jname>"+esc(g.goal_text)+"</div><div class=jmeta>"+esc(g.project)+"</div></div><div class=jmeta>pursued "+timeAgo(g.last_pursued_at)+"</div></div>";});
+      h+="</div>";
+    }
+
+    // 3. The library (book summaries)
+    if(BOOKS.length){
+      h+="<div class=panel><h3>📚 The library — what the AI currently understands</h3><div class=sub style='margin-bottom:10px'>Refreshed automatically by the reflection pass, not by you.</div>"+
+        BOOKS.map(function(b){return "<div style='margin-bottom:10px'><div style='font-weight:500;font-size:13px'>"+esc(b.project)+"</div><div class=sub style='font-size:12.5px'>"+esc(b.summary||"(no summary yet)")+"</div></div>";}).join("")+
+        "</div>";
+    }
+
+    // 4. Standalone context notes
+    if(NOTES.length){
+      var groups={};var order=[];
+      NOTES.forEach(function(n){var p=n.project||"Other";if(!groups[p]){groups[p]=[];order.push(p)}groups[p].push(n)});
+      h+="<div class=panel><h3>📎 Context notes</h3><div class=sub style='margin-bottom:10px'>Background knowledge the AI has filed — facts that didn't need to become tasks.</div>"+
+        order.map(function(p){
+          return "<div class=daygroup><h4>"+esc(p)+"</h4>"+groups[p].map(function(n){
+            return "<div class=evt><div class=body><div class=title>"+esc(n.text)+"</div><div class=loc>"+new Date(n.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+"</div></div></div>";
+          }).join("")+"</div>";
+        }).join("")+"</div>";
+    }
+
+    // 5. Charts
+    var open=DATA.filter(isOpen);var agentCan=open.filter(function(r){return r.agent_doable}).length;var mine=open.length-agentCan;
+    h+="<div class=panel><h3>Who acts on it</h3><canvas id=c1 height=150></canvas></div><div class=panel><h3>Open items by project</h3><canvas id=c2 height=150></canvas></div>";
+
+    // 6. Recent activity feed
+    if(sys.activity&&sys.activity.length){
+      h+="<div class=panel><h3>Recent activity</h3><div class=sub style='margin-bottom:10px'>What's actually happened, most recent first.</div><div class=acttl>";
+      sys.activity.forEach(function(a){
+        var icon=a.kind==="note"?"📎":(a.proactive?"💡":(a.source==="telegram"||a.source==="web"?"💬":"⚙️"));
+        var src=a.source==="goal_pursuit"?"goal pursuit":a.source==="reflection"?"reflection":a.source==="triage_split"?"triage":esc(a.source||"");
+        h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(a.title)+"</div><div class=actm>"+esc(a.project||"")+" · "+src+" · "+timeAgo(a.at)+"</div></div></div>";
+      });
+      h+="</div></div>";
+    }
+
+    // 7. How it works — static reference, least "live," lowest priority placement
+    h+="<div class=panel><h3>How it actually works</h3><div class=sub style='margin-bottom:12px'>The real pipeline — not a mockup.</div>";
     h+="<div class=pipeline>"+
       "<div class=pstage><span class='pdot live'></span><div><div class=pname>You dump a thought</div><div class=pdesc>Telegram, voice, or the box above — always on</div></div></div>"+
       "<div class=parrow>↓</div>"+
@@ -354,50 +407,15 @@ function renderSystem(){
       "<div class=pstage><span class='pdot manual'></span><div><div class=pname>You</div><div class=pdesc>the one checkpoint for anything real-world or irreversible</div></div></div>"+
       "</div></div>";
 
-    var running=(sys.running||[]);
-    if(running.length){
-      h+="<div class=panel><h3>🟢 Running right now</h3>";
-      running.forEach(function(r){
-        h+="<div class=jobcard><div><div class=jname>⏳ "+esc(FN_NAME[r.fn]||r.fn)+"</div><div class=jmeta>"+esc(r.detail||"")+"</div></div><div class=jmeta style='text-align:right'>started "+timeAgo(r.started_at)+"</div></div>";
-      });
-      h+="</div>";
-    }
-
-    h+="<div class=panel><h3>Autonomous jobs — live status</h3>";
-    (sys.jobs||[]).forEach(function(j){
-      var meta=JOB_META[j.jobname]||{name:j.jobname,desc:"",dot:j.active?"live":"off"};
-      var ok=j.last_status==="succeeded";
-      h+="<div class=jobcard><div><div class=jname>"+(ok?"🟢":"🔴")+" "+esc(meta.name)+"</div><div class=jmeta>"+esc(meta.desc)+"</div></div><div class=jmeta style='text-align:right'>last ran "+timeAgo(j.last_run_at)+"<br>"+esc(j.schedule)+"</div></div>";
-    });
-    h+="</div>";
-
-    if(sys.goals&&sys.goals.length){
-      h+="<div class=panel><h3>Standing goals</h3>";
-      sys.goals.forEach(function(g){h+="<div class=jobcard><div><div class=jname>🎯 "+esc(g.goal_text)+"</div><div class=jmeta>"+esc(g.project)+"</div></div><div class=jmeta>pursued "+timeAgo(g.last_pursued_at)+"</div></div>";});
-      h+="</div>";
-    }
-
-    h+="<div class=panel><h3>Live activity</h3><div class=sub style='margin-bottom:10px'>What's actually happened, most recent first.</div><div class=acttl>";
-    (sys.activity||[]).forEach(function(a){
-      var icon=a.kind==="note"?"📎":(a.proactive?"💡":(a.source==="telegram"||a.source==="web"?"💬":"⚙️"));
-      var src=a.source==="goal_pursuit"?"goal pursuit":a.source==="reflection"?"reflection":a.source==="triage_split"?"triage":esc(a.source||"");
-      h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(a.title)+"</div><div class=actm>"+esc(a.project||"")+" · "+src+" · "+timeAgo(a.at)+"</div></div></div>";
-    });
-    h+="</div></div>";
-
-    if(sys.runs&&sys.runs.length){
-      h+="<div class=panel><h3>Agent run history</h3><div class=sub style='margin-bottom:10px'>Every triage/reflection/goal-pursuit/dispatch invocation that actually did something.</div><div class=acttl>";
-      sys.runs.forEach(function(r){
-        var icon=r.status==="running"?"⏳":r.status==="failed"?"❌":"✅";
-        h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(FN_NAME[r.fn]||r.fn)+"</div><div class=actm>"+esc(r.detail||"")+" · "+timeAgo(r.started_at)+"</div></div></div>";
-      });
-      h+="</div></div>";
-    }
-
     el("view").innerHTML=h;
+    if(chart1)chart1.destroy();if(chart2)chart2.destroy();
+    chart1=new Chart(el("c1"),{type:"doughnut",data:{labels:["Agent can handle","Your calls"],datasets:[{data:[agentCan,mine],backgroundColor:["#10b981","#8b5cf6"],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{color:getComputedStyle(document.body).color}}}}});
+    var ps=Array.from(new Set(open.map(function(r){return r.project||"Other"})));
+    var COLORS=["#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#6b7280","#ef4444"];
+    chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(_,i){return COLORS[i%COLORS.length]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:getComputedStyle(document.body).color}},x:{ticks:{color:getComputedStyle(document.body).color}}}}});
   });
 }
-function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="context")renderContext();else if(TAB==="system")renderSystem();else if(TAB==="feedback")renderFeedback();else renderInsights()}
+function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="mind")renderMind();else renderFeedback()}
 
 // ---- item detail: view, edit, dispatch ----
 function openDetail(id){
@@ -525,7 +543,7 @@ el("addgo").addEventListener("click",openAddTask);
 document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;renderCurrent()})});
 el("logout").addEventListener("click",function(){if(confirm("Lock the app? You'll need your password to get back in."))
   {localStorage.removeItem("ts_token");location.reload()}});
-el("themebtn").addEventListener("click",function(){var cur=document.documentElement.getAttribute("data-theme");var next=cur==="dark"?"light":"dark";localStorage.setItem("ts_theme",next);applyTheme(next);if(TAB==="insights")renderInsights()});
+el("themebtn").addEventListener("click",function(){var cur=document.documentElement.getAttribute("data-theme");var next=cur==="dark"?"light":"dark";localStorage.setItem("ts_theme",next);applyTheme(next);if(TAB==="mind")renderMind()});
 el("pushbtn").addEventListener("click",enablePush);
 el("modal").addEventListener("click",function(e){if(e.target===el("modal"))closeDetail()});
 
@@ -594,11 +612,13 @@ async function handleDeepLinks(){
 var LIVE_TIMER=null;
 function startLive(){
   el("livedot").style.display="inline-block";
+  fetchSystem();
   if(LIVE_TIMER)return;
   LIVE_TIMER=setInterval(async function(){
     if(document.hidden)return;
     var res=await fetchData();
     el("livedot").classList.toggle("off",res==="offline");
+    fetchSystem();
   },6000);
 }
 async function boot(){
