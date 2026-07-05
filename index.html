@@ -222,6 +222,11 @@ function itemCard(r){var idea=isProactive(r)?"💡 ":"";var mode=r.execution_mod
 
 function renderBoard(){
   var open=DATA.filter(isOpen);var agent=open.filter(function(r){return r.agent_doable});var mine=open.filter(function(r){return !r.agent_doable});
+  // Order lanes by the kernel's objective priority (via goal_id), then stakes — highest-leverage work floats to the top.
+  var PRI={};if(SYS&&SYS.tree)SYS.tree.forEach(function(g){if(g.kind==="objective")PRI[g.id]=Number(g.priority)||0});
+  var SRANK={money:0,high:1,medium:2,low:3};
+  var isort=function(a,b){var pa=PRI[a.goal_id]||0,pb=PRI[b.goal_id]||0;if(pb!==pa)return pb-pa;var sa=SRANK[a.stakes]!==undefined?SRANK[a.stakes]:9,sb=SRANK[b.stakes]!==undefined?SRANK[b.stakes]:9;return sa-sb};
+  agent=agent.slice().sort(isort);mine=mine.slice().sort(isort);
   var now=Date.now();var soon=open.filter(function(r){if(!r.due_date)return false;var d=new Date(r.due_date).getTime();return d-now<=7*864e5&&d-now>=-40*864e5});
   var done=DATA.filter(function(r){return r.status==="done"});
   var cards=[["Open",open.length],["Agent can do",agent.length],["Your calls",mine.length],["Due ≤7 days",soon.length]];
@@ -362,6 +367,7 @@ function paintMind(sys){
         h+="</div>";
       }
       if(sys.attention)h+="<div class=sub style='margin-top:10px;font-size:12px'>👆 Approvals surfaced today: "+(Number(sys.attention.spent_amount)||0)+"/"+(Number(sys.attention.limit_amount)||0)+" (past the cap they queue quietly here instead of pinging you)</div>";
+      if(sys.llm_today)h+="<div class=sub style='font-size:12px;margin-top:4px'>🔋 LLM spend today: ~$"+Number(sys.llm_today.cost_usd).toFixed(2)+" ("+Math.round((Number(sys.llm_today.input_tokens)+Number(sys.llm_today.output_tokens))/1000)+"k tokens)</div>";
       if(sys.pendingApprovals&&sys.pendingApprovals.length){
         h+="<div style='margin-top:10px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px'>⚠️ Waiting on your OK</div>";
         sys.pendingApprovals.forEach(function(a){
