@@ -332,11 +332,37 @@ function renderAgentStrip(){
   }).join("");
 }
 function renderMind(){
-  el("view").innerHTML="<div class=empty>Loading…</div>";
+  if(!SYS)el("view").innerHTML="<div class=empty>Loading…</div>";
+  else paintMind(SYS);
   fetchSystem().then(function(sys){
     if(TAB!=="mind")return;
-    if(!sys){el("view").innerHTML="<div class=empty>Couldn't load. Check your connection.</div>";return}
+    if(!sys){if(!SYS)el("view").innerHTML="<div class=empty>Couldn't load. Check your connection.</div>";return}
+    paintMind(sys);
+  });
+}
+function paintMind(sys){
     var h="";
+
+    // 0. Strategy — the kernel's read: the one-page digest, the top move, and the priced goal tree.
+    var k=sys.kernel;var tree=sys.tree||[];
+    if(k||tree.length){
+      h+="<div class=panel><h3>🎯 Strategy — the kernel's read</h3>";
+      if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:10px;padding:10px 12px;margin-bottom:10px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px'>Highest leverage right now</div><div style='font-size:14px;font-weight:500'>"+esc(k.top_move)+"</div></div>";
+      if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;line-height:1.5;margin-bottom:12px'>"+esc(k.digest)+"</div>";
+      var objs=tree.filter(function(g){return g.kind==="objective"});
+      var maxEv=Math.max.apply(null,objs.map(function(g){return Number(g.expected_value_usd)||0}).concat([1]));
+      if(objs.length){
+        h+="<div style='margin-top:6px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px'>Where effort is going (kernel-priced)</div>";
+        objs.forEach(function(g){
+          var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
+          var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
+          h+="<div style='margin-bottom:9px'><div style='display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>pri "+Math.round(pri)+" · "+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
+        });
+        h+="</div>";
+      }
+      if(k&&k.created_at)h+="<div class=sub style='margin-top:8px;font-size:11px;opacity:.7'>Kernel last ran "+timeAgo(k.created_at)+"</div>";
+      h+="</div>";
+    }
 
     // 1. Live agents — organized per-agent, not a flat log. This is the "watch it work" view.
     var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
@@ -424,7 +450,6 @@ function renderMind(){
     var ps=Array.from(new Set(open.map(function(r){return r.project||"Other"})));
     var COLORS=["#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#6b7280","#ef4444"];
     chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(_,i){return COLORS[i%COLORS.length]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:getComputedStyle(document.body).color}},x:{ticks:{color:getComputedStyle(document.body).color}}}}});
-  });
 }
 function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="mind")renderMind();else renderFeedback()}
 
