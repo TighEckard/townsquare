@@ -111,6 +111,7 @@ button:hover{opacity:.85}
 .pdot.live{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
 .pdot.manual{background:#f59e0b}
 .pdot.off{background:#6b7280}
+.pdot.cond{background:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,.18)}
 .jobcard{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px}
 .jobcard .jname{font-weight:500}
 .jobcard .jmeta{color:var(--mut);font-size:11px}
@@ -346,7 +347,9 @@ function renderSystem(){
       "<div class=parrow>↓</div>"+
       "<div class=pstage><span class='pdot live'></span><div><div class=pname>Reflection + Goal pursuit</div><div class=pdesc>runs on its own — finds cross-project insights, researches your goals, reminds you of open decisions</div></div></div>"+
       "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot manual'></span><div><div class=pname>Dispatch</div><div class=pdesc>you tap it — an agent actually does the work</div></div></div>"+
+      "<div class=pstage><span class='pdot manual'></span><div><div class=pname>Dispatch</div><div class=pdesc>you tap it — LLM tasks get drafted immediately; 🌐 browser tasks get queued</div></div></div>"+
+      "<div class=parrow>↓</div>"+
+      "<div class=pstage><span class='pdot cond'></span><div><div class=pname>🌐 Browser worker</div><div class=pdesc>every 15 min, drives real Chrome — scouts freely, but stops before any send/order/submit to ask first. Needs your computer on</div></div></div>"+
       "<div class=parrow>↓</div>"+
       "<div class=pstage><span class='pdot manual'></span><div><div class=pname>You</div><div class=pdesc>the one checkpoint for anything real-world or irreversible</div></div></div>"+
       "</div></div>";
