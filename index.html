@@ -314,9 +314,10 @@ function renderDailyPlanCard(){
 }
 function timeAgo(iso){if(!iso)return "never";var s=(Date.now()-new Date(iso).getTime())/1000;if(s<60)return "just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
 var AGENTS=[
+  {fn:"kernel",name:"🧠 Kernel",desc:"daily ~7am — prices every objective by dollar leverage, sets the day's strategy",jobname:"kernel-daily"},
   {fn:"triage",name:"Triage",desc:"sorts every dump — context vs. new task",jobname:"triage-every-minute"},
   {fn:"reflection",name:"Reflection",desc:"reviews everything, reminds you of open decisions",jobname:"reflection-twice-daily"},
-  {fn:"goal-pursuit",name:"Goal pursuit",desc:"researches your standing goals, proposes next steps",jobname:"goal-pursuit-daily"},
+  {fn:"goal-pursuit",name:"Goal pursuit",desc:"pursues the kernel's top-priority objective, proposes next steps",jobname:"goal-pursuit-daily"},
   {fn:"browser-worker",name:"🌐 Browser worker",desc:"every 15 min — drives real Chrome, asks before any send/order/submit"},
   {fn:"email-scanner",name:"📧 Email scanner",desc:"every 3 hrs — reads Gmail + Outlook for relevant context, read-only"},
   {fn:"dispatch",name:"Dispatch",desc:"runs when you tap an agent-doable item"},
@@ -357,6 +358,15 @@ function paintMind(sys){
           var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
           var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
           h+="<div style='margin-bottom:9px'><div style='display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>pri "+Math.round(pri)+" · "+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
+        });
+        h+="</div>";
+      }
+      if(sys.attention)h+="<div class=sub style='margin-top:10px;font-size:12px'>👆 Approvals surfaced today: "+(Number(sys.attention.spent_amount)||0)+"/"+(Number(sys.attention.limit_amount)||0)+" (past the cap they queue quietly here instead of pinging you)</div>";
+      if(sys.pendingApprovals&&sys.pendingApprovals.length){
+        h+="<div style='margin-top:10px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px'>⚠️ Waiting on your OK</div>";
+        sys.pendingApprovals.forEach(function(a){
+          var oc=a.item_id?" onclick=\"openDetail('"+a.item_id+"')\"":"";
+          h+="<div class=item"+oc+"><div class=t>"+esc(a.summary)+(a.suppressed?" <span class=sub>(quiet — tap budget hit)</span>":"")+"</div><div class=m><span class=sub>"+esc(a.requested_by)+" · "+timeAgo(a.created_at)+"</span></div></div>";
         });
         h+="</div>";
       }
