@@ -330,6 +330,7 @@ var JOB_META={
   "reflection-twice-daily":{name:"Reflection",desc:"reviews everything, reminds you of open decisions",dot:"live"},
   "goal-pursuit-daily":{name:"Goal pursuit",desc:"researches your standing goals, proposes next steps",dot:"live"}
 };
+var FN_NAME={"triage":"Triage","reflection":"Reflection","goal-pursuit":"Goal pursuit","dispatch":"Dispatch (agent working)"};
 function renderSystem(){
   el("view").innerHTML="<div class=empty>Loading live system status…</div>";
   fetchSystem().then(function(sys){
@@ -349,6 +350,15 @@ function renderSystem(){
       "<div class=parrow>↓</div>"+
       "<div class=pstage><span class='pdot manual'></span><div><div class=pname>You</div><div class=pdesc>the one checkpoint for anything real-world or irreversible</div></div></div>"+
       "</div></div>";
+
+    var running=(sys.running||[]);
+    if(running.length){
+      h+="<div class=panel><h3>🟢 Running right now</h3>";
+      running.forEach(function(r){
+        h+="<div class=jobcard><div><div class=jname>⏳ "+esc(FN_NAME[r.fn]||r.fn)+"</div><div class=jmeta>"+esc(r.detail||"")+"</div></div><div class=jmeta style='text-align:right'>started "+timeAgo(r.started_at)+"</div></div>";
+      });
+      h+="</div>";
+    }
 
     h+="<div class=panel><h3>Autonomous jobs — live status</h3>";
     (sys.jobs||[]).forEach(function(j){
@@ -371,6 +381,16 @@ function renderSystem(){
       h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(a.title)+"</div><div class=actm>"+esc(a.project||"")+" · "+src+" · "+timeAgo(a.at)+"</div></div></div>";
     });
     h+="</div></div>";
+
+    if(sys.runs&&sys.runs.length){
+      h+="<div class=panel><h3>Agent run history</h3><div class=sub style='margin-bottom:10px'>Every triage/reflection/goal-pursuit/dispatch invocation that actually did something.</div><div class=acttl>";
+      sys.runs.forEach(function(r){
+        var icon=r.status==="running"?"⏳":r.status==="failed"?"❌":"✅";
+        h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(FN_NAME[r.fn]||r.fn)+"</div><div class=actm>"+esc(r.detail||"")+" · "+timeAgo(r.started_at)+"</div></div></div>";
+      });
+      h+="</div></div>";
+    }
+
     el("view").innerHTML=h;
   });
 }
@@ -549,7 +569,7 @@ async function handleDeepLinks(){
   if(approve||cancel||item){
     history.replaceState({},"",location.pathname);
   }
-  if(item){var row=DATA.find(function(r){return r.id===item});if(row)openDetail(row);}
+  if(item)openDetail(item);
 }
 var LIVE_TIMER=null;
 function startLive(){
