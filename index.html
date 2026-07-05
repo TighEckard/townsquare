@@ -225,7 +225,8 @@ function renderBoard(){
   var now=Date.now();var soon=open.filter(function(r){if(!r.due_date)return false;var d=new Date(r.due_date).getTime();return d-now<=7*864e5&&d-now>=-40*864e5});
   var done=DATA.filter(function(r){return r.status==="done"});
   var cards=[["Open",open.length],["Agent can do",agent.length],["Your calls",mine.length],["Due ≤7 days",soon.length]];
-  var h="<div class=cards>"+cards.map(function(c){return "<div class=metric><div class=n>"+c[1]+"</div><div class=l>"+c[0]+"</div></div>"}).join("")+"</div>";
+  var h=renderDailyPlanCard();
+  h+="<div class=cards>"+cards.map(function(c){return "<div class=metric><div class=n>"+c[1]+"</div><div class=l>"+c[0]+"</div></div>"}).join("")+"</div>";
   var lanes=[["New",open.filter(function(r){return r.status==="captured"})],["Agent can handle",agent.filter(function(r){return r.status!=="captured"})],["Your calls",mine.filter(function(r){return r.status!=="captured"})]];
   h+="<div class=board>"+lanes.map(function(l){return "<div class=col><h4>"+l[0]+" ("+l[1].length+")</h4>"+(l[1].length?l[1].map(itemCard).join(""):"<div class=sub>nothing here</div>")+"</div>"}).join("")+"</div>";
   if(done.length)h+="<div class=col style='margin-top:18px'><h4>Done ("+done.length+")</h4>"+done.slice(0,8).map(itemCard).join("")+"</div>";
@@ -302,6 +303,15 @@ async function submitAddEvent(){
 }
 var SYS=null;
 async function fetchSystem(){var r;try{r=await fetch(FN+"/system-status",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;SYS=await r.json();renderAgentStrip();return SYS}
+var DAILY_PLAN=null;
+async function fetchDailyPlan(){var r;try{r=await fetch(FN+"/daily-plan",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;var d=await r.json().catch(function(){return {}});DAILY_PLAN=d.plan||null;return DAILY_PLAN}
+async function toggleDailyItem(planDate,idx){await fetch(FN+"/daily-plan",{method:"POST",headers:authHeaders(),body:JSON.stringify({action:"toggleItem",plan_date:planDate,index:idx})});await fetchDailyPlan();renderBoard()}
+function renderDailyPlanCard(){
+  if(!DAILY_PLAN)return "";
+  var p=DAILY_PLAN;var list=Array.isArray(p.checklist)?p.checklist:[];
+  var items=list.map(function(c,i){return "<div style='display:flex;align-items:flex-start;gap:8px;padding:6px 0'><input type=checkbox "+(c.done?"checked":"")+" onchange=\"toggleDailyItem('"+p.plan_date+"',"+i+")\" style='margin-top:2px'/><span style='"+(c.done?"text-decoration:line-through;color:var(--mut)":"")+"'>"+esc(c.text)+"</span></div>";}).join("");
+  return "<div class=panel><h3>☀️ Today's plan</h3>"+(p.focus?"<div class=sub style='margin-bottom:8px;font-weight:500;color:var(--tx)'>🎯 "+esc(p.focus)+"</div>":"")+items+(p.note?"<div class=sub style='margin-top:8px;font-style:italic'>"+esc(p.note)+"</div>":"")+"</div>";
+}
 function timeAgo(iso){if(!iso)return "never";var s=(Date.now()-new Date(iso).getTime())/1000;if(s<60)return "just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
 var AGENTS=[
   {fn:"triage",name:"Triage",desc:"sorts every dump — context vs. new task",jobname:"triage-every-minute"},
@@ -613,12 +623,14 @@ var LIVE_TIMER=null;
 function startLive(){
   el("livedot").style.display="inline-block";
   fetchSystem();
+  fetchDailyPlan().then(function(){if(TAB==="board")renderBoard()});
   if(LIVE_TIMER)return;
   LIVE_TIMER=setInterval(async function(){
     if(document.hidden)return;
     var res=await fetchData();
     el("livedot").classList.toggle("off",res==="offline");
     fetchSystem();
+    fetchDailyPlan().then(function(){if(TAB==="board")renderBoard()});
   },6000);
 }
 async function boot(){
