@@ -459,20 +459,33 @@ var activeRecognition=null;
 function startVoice(targetId,btn){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast("Voice input isn't supported in this browser — try Chrome, or just type.");return}
-  if(activeRecognition){activeRecognition.stop();return}
+  if(activeRecognition){try{activeRecognition.abort()}catch(e){}activeRecognition=null;return}
   var r=new SR();
   r.continuous=false;
   r.interimResults=true;
   r.lang="en-US";
-  var reset=function(){activeRecognition=null;btn.classList.remove("listening");btn.textContent="🎤"};
+  var timeoutId=null;
+  var reset=function(){if(timeoutId){clearTimeout(timeoutId);timeoutId=null}activeRecognition=null;btn.classList.remove("listening");btn.textContent="🎤"};
   r.onresult=function(e){
+    if(timeoutId){clearTimeout(timeoutId);timeoutId=null}
     var t="";
     for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;
     el(targetId).value=t;
   };
   r.onend=reset;
   r.onerror=function(e){reset();if(e.error!=="aborted")toast("Voice input error: "+e.error)};
-  try{r.start();activeRecognition=r;btn.classList.add("listening");btn.textContent="⏹"}
+  try{
+    r.start();activeRecognition=r;btn.classList.add("listening");btn.textContent="⏹";
+    // Safety net: on iOS, the native "Access Speech Recognition" permission dialog can silently fail to appear
+    // inside an installed home-screen PWA, leaving recognition hung forever with no event ever firing.
+    timeoutId=setTimeout(function(){
+      if(activeRecognition===r){
+        try{r.abort()}catch(e){}
+        reset();
+        toast("Voice input didn't respond — try again, or open this in Safari directly (not the installed app) once to grant mic access.");
+      }
+    },10000);
+  }
   catch(e){reset()}
 }
 
