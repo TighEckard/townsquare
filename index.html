@@ -132,6 +132,11 @@ button{font-family:inherit;cursor:pointer}
 .acticon{width:22px;text-align:center;flex-shrink:0;font-size:13px}
 .actbody .actt{color:var(--tx)}
 .actbody .actm{color:var(--mut);font-size:10.5px;margin-top:2px}
+.pagetitle{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:2px 0 16px}
+.pagesub{color:var(--mut);font-size:13.5px;margin:-10px 0 18px;line-height:1.45}
+.section{margin-bottom:24px}
+.section h4{font-size:12px;color:var(--mut);margin:0 0 12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.wdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#fcd34d;margin-right:7px;box-shadow:0 0 0 rgba(252,211,77,.5);animation:pulse 1.4s infinite;vertical-align:middle;flex-shrink:0}
 @media(min-width:560px){.cards{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:640px){#modal{align-items:center}#modalCard{border-radius:22px;padding-bottom:24px}#modalCard::before{display:none}}
 </style>
@@ -148,33 +153,23 @@ button{font-family:inherit;cursor:pointer}
 </div></div>
 
 <div id="app" style="display:none">
-  <header class="appbar">
-    <div class="brand">
-      <h1>Town Square<span id="livedot" class="livedot" style="display:none" title="Live — refreshing automatically"></span></h1>
-      <div class="sub" id="cnt"></div>
-    </div>
-    <div class="hdrbtns">
-      <button class="btn icon" id="pushbtn" title="Enable push notifications">🔔</button>
-      <button class="btn icon" id="themebtn" title="Toggle theme">◐</button>
-      <button class="btn sec" id="logout">Lock</button>
-    </div>
-  </header>
   <div class="wrap">
     <div id="offline">Can't reach the server right now — showing your last loaded data. Your login is still saved.</div>
-    <div class="compose">
-      <input id="cap" placeholder="Dump a thought, task, or idea…"/>
-      <button class="cbtn" id="micgo" title="Voice input">🎤</button>
-      <button class="cbtn send" id="capgo" title="Send">↑</button>
+    <div id="composewrap">
+      <div class="compose">
+        <input id="cap" placeholder="Tell it something, or ask it to do something…"/>
+        <button class="cbtn" id="micgo" title="Voice input">🎤</button>
+        <button class="cbtn send" id="capgo" title="Send">↑</button>
+      </div>
+      <button class="addlink" id="addgo">＋ Add a detailed task</button>
     </div>
-    <button class="addlink" id="addgo">＋ Add a detailed task</button>
     <div id="view"></div>
   </div>
   <nav class="bottomnav">
-    <button class="tab on" data-tab="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1.6"/><rect x="14" y="4" width="7" height="10" rx="1.6"/></svg><span>Board</span></button>
-    <button class="tab" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.5v3.2M16 3.5v3.2"/></svg><span>Calendar</span></button>
+    <button class="tab on" data-tab="todo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16.5" rx="2.2"/><path d="M9 4.5h6v2.6H9z"/><path d="M8.7 13l2 2 4-4.4"/></svg><span>To-Do</span></button>
     <button class="tab" data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a7.6 7.6 0 0 1-11 6.8L4 20l1.3-4.2A7.6 7.6 0 1 1 20.5 11.6Z"/></svg><span>Chat</span></button>
-    <button class="tab" data-tab="mind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l1.7 4.6L18.3 9.5l-4.6 1.7L12 15.8l-1.7-4.6L5.7 9.5l4.6-1.7L12 3.2Z"/><path d="M18.2 14.2l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8.8-2.3Z"/></svg><span>Mind</span></button>
-    <button class="tab" data-tab="feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 18h5.6M10.2 21h3.6M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2h5c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/></svg><span>Feedback</span></button>
+    <button class="tab" data-tab="output"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.6A1.6 1.6 0 0 1 5.6 4h12.8A1.6 1.6 0 0 1 20 5.6v12.8a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 18.4z"/><path d="M4 14h4.3a1 1 0 0 1 1 .9 2.7 2.7 0 0 0 5.4 0 1 1 0 0 1 1-.9H20"/></svg><span>Output</span></button>
+    <button class="tab" data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span>More</span></button>
   </nav>
 </div>
 
@@ -184,7 +179,7 @@ button{font-family:inherit;cursor:pointer}
 <script>
 var FN="https://enrybarwjcqpibiqactn.supabase.co/functions/v1";
 var VAPID_PUBLIC_KEY="BNbOQylhDKfRbN8YGRzA3vcJIt61wTGt6tZHTMcImX1lNHatT92UYE7gpmPUTQy-C1sZlao1BbkW-fhqSTnZPMo";
-var DATA=[];var TAB="board";var MODE="login";var chart1=null,chart2=null;
+var DATA=[];var TAB="todo";var MODE="login";var chart1=null,chart2=null;
 var PROJECTS=["Ulio","Next venture","Personal","Family","Health","Platform","Other"];
 function el(i){return document.getElementById(i)}
 function tok(){return localStorage.getItem("ts_token")}
@@ -199,7 +194,9 @@ function badge(s){var b=statusInfo(s);return "<span class=badge style='backgroun
 function tag(p){return "<span class='tag "+pcls(p)+"'>"+esc(p||"Other")+"</span>"}
 
 // ---- theme ----
-function applyTheme(t){document.documentElement.setAttribute("data-theme",t);el("themebtn").textContent=t==="dark"?"◐":"◑"}
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);var b=el("themebtn");if(b)b.textContent=t==="dark"?"◐":"◑"}
+function toggleTheme(){var cur=document.documentElement.getAttribute("data-theme");var next=cur==="dark"?"light":"dark";localStorage.setItem("ts_theme",next);applyTheme(next);renderCurrent()}
+function doLogout(){if(confirm("Lock the app? You'll need your password to get back in.")){localStorage.removeItem("ts_token");location.reload()}}
 (function(){var t=localStorage.getItem("ts_theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();
 
 // ---- auth / data (robust: only a real 401 clears the saved login) ----
@@ -215,7 +212,7 @@ async function changeSetting(key,value,ctrl){
   if(ctrl)ctrl.disabled=false;
   if(res&&res.error){alert("Couldn't change that: "+res.error);}
   await fetchSystem();
-  if(TAB==="mind")paintMind(SYS);
+  if(TAB==="more")paintMore();
 }
 var NOTES=[];var BOOKS=[];
 async function fetchData(){
@@ -230,7 +227,7 @@ async function fetchData(){
   DATA=payload.items||[];
   NOTES=payload.notes||[];
   BOOKS=payload.books||[];
-  el("cnt").textContent="your chief of staff · "+DATA.length+" items · "+NOTES.length+" notes";
+  var c=el("cnt");if(c)c.textContent="your chief of staff · "+DATA.length+" items · "+NOTES.length+" notes";
   renderCurrent();
   return true;
 }
@@ -261,21 +258,126 @@ function renderFeedback(){
   h+=items.length?items.map(itemCard).join(""):"<div class=empty>Nothing logged yet.</div>";
   el("view").innerHTML=h;
 }
+function pageTitle(t,sub){return "<div class=pagetitle>"+esc(t)+"</div>"+(sub?"<div class=pagesub>"+esc(sub)+"</div>":"")}
+
 function renderChat(){
-  if(!DATA.length){el("view").innerHTML="<div class=empty>No messages yet. Dump a thought above, or text the Telegram bot.</div>";return}
+  if(!DATA.length){el("view").innerHTML=pageTitle("Chat")+"<div class=empty>Nothing yet. Use the box above — tell it something, or ask it to do something.</div>";return}
   var groups={};var order=[];
   DATA.forEach(function(r){var key=(r.raw_text||r.title||"")+"|"+String(r.created_at).slice(0,16);if(!groups[key]){groups[key]=[];order.push(key)}groups[key].push(r)});
   var arr=order.map(function(k){var items=groups[k];return {items:items,created_at:items[0].created_at,raw:items[0].raw_text||items[0].title}});
   arr.sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});
-  var h=arr.map(function(g){
+  var h=pageTitle("Chat")+"<div class=chat>"+arr.map(function(g){
     var when=new Date(g.created_at).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
     var src=g.items[0].source||"";
     var you="<div class=bubblewrap you><div class='bubble you'>"+esc(g.raw)+"</div></div><div class=chattime>"+esc(when)+(src?" · "+esc(src):"")+"</div>";
-    var chips=g.items.map(function(it){return "<div class=chip onclick=\"openDetail('"+it.id+"')\">"+esc(it.title||it.raw_text)+" "+badge(it.status)+"</div>"}).join("");
-    var bot="<div class=bubblewrap><div class='bubble bot'>Sorted into:<div class=chips>"+chips+"</div></div></div>";
+    var chips=g.items.map(function(it){
+      var working=it.status==="agent_working"||it.status==="browser_working";
+      var lead=working?"<span class=wdot></span>":(it.agent_doable?"🤖 ":"");
+      return "<div class=chip onclick=\"openDetail('"+it.id+"')\">"+lead+esc(it.title||it.raw_text)+" "+badge(it.status)+"</div>";
+    }).join("");
+    var bot="<div class=bubblewrap><div class='bubble bot'><div class=sub style='margin-bottom:7px;font-size:12px'>Sorted into:</div><div class=chips>"+chips+"</div></div></div>";
     return "<div class=chatgroup>"+you+bot+"</div>";
-  }).join("");
-  el("view").innerHTML="<div class=chat>"+h+"</div>";
+  }).join("")+"</div>";
+  el("view").innerHTML=h;
+}
+
+// ---- TO-DO: only what YOU need to act on ----
+function renderTodo(){
+  var h=pageTitle("To-Do");
+  h+=renderDailyPlanCard();
+  var open=DATA.filter(isOpen);
+  var PRI={};if(SYS&&SYS.tree)SYS.tree.forEach(function(g){if(g.kind==="objective")PRI[g.id]=Number(g.priority)||0});
+  var SRANK={money:0,high:1,medium:2,low:3};
+  var isort=function(a,b){var pa=PRI[a.goal_id]||0,pb=PRI[b.goal_id]||0;if(pb!==pa)return pb-pa;var sa=SRANK[a.stakes]!==undefined?SRANK[a.stakes]:9,sb=SRANK[b.stakes]!==undefined?SRANK[b.stakes]:9;return sa-sb};
+  var isApproval=function(r){return r.status==="awaiting_approval"||r.status==="approved"};
+  var approvals=open.filter(isApproval).sort(isort);
+  var mine=open.filter(function(r){return !r.agent_doable&&r.status!=="captured"&&!isApproval(r)}).sort(isort);
+  var agentable=open.filter(function(r){return r.agent_doable&&r.status!=="captured"&&!r.result&&!isApproval(r)&&r.status!=="agent_working"&&r.status!=="browser_working"}).sort(isort);
+  if(approvals.length)h+="<div class=section><h4>⚠️ Needs your OK</h4>"+approvals.map(itemCard).join("")+"</div>";
+  if(mine.length)h+="<div class=section><h4>Your tasks ("+mine.length+")</h4>"+mine.map(itemCard).join("")+"</div>";
+  if(agentable.length)h+="<div class=section><h4>Hand to the agent ("+agentable.length+")</h4><div class=sub style='margin:-4px 0 10px;font-size:12.5px'>Tap one, then Dispatch to let it run.</div>"+agentable.map(itemCard).join("")+"</div>";
+  if(!approvals.length&&!mine.length&&!agentable.length&&!DAILY_PLAN)h+="<div class=empty>Nothing on your plate right now. Add something in Chat.</div>";
+  el("view").innerHTML=h;
+}
+
+// ---- OUTPUT: finished agent work + what's running ----
+function renderOutput(){
+  var h=pageTitle("Output","Finished work from the agents — tap to read the full thing.");
+  var working=DATA.filter(function(r){return r.status==="agent_working"||r.status==="browser_working"});
+  var done=DATA.filter(function(r){return r.result&&(r.status==="needs_you"||r.status==="done")});
+  done.sort(function(a,b){return new Date(b.completed_at||b.created_at)-new Date(a.completed_at||a.created_at)});
+  if(working.length)h+="<div class=section><h4>Working now</h4>"+working.map(function(r){return "<div class=item onclick=\"openDetail('"+r.id+"')\"><div class=t><span class=wdot></span>"+esc(r.title||r.raw_text)+"</div><div class=m>"+tag(r.project)+"<span class=sub>agent working…</span></div></div>";}).join("")+"</div>";
+  if(done.length)h+="<div class=section><h4>Ready for you ("+done.length+")</h4>"+done.map(function(r){
+    var preview=(r.result||"").replace(/\s+/g," ").slice(0,130);
+    return "<div class=item onclick=\"openDetail('"+r.id+"')\"><div class=t>"+esc(r.title||r.raw_text)+"</div><div class=sub style='margin-top:7px;font-size:12.5px;line-height:1.5'>"+esc(preview)+((r.result||"").length>130?"…":"")+"</div><div class=m style='margin-top:9px'>"+tag(r.project)+badge(r.status)+"</div></div>";
+  }).join("")+"</div>";
+  if(!working.length&&!done.length)h+="<div class=empty>Nothing yet. When an agent finishes something, it shows up here.</div>";
+  el("view").innerHTML=h;
+}
+
+// ---- MORE: calendar, strategy, permissions, library, app settings ----
+function renderMore(){
+  paintMore();
+  fetchSystem().then(function(){if(TAB==="more")paintMore()});
+  fetchCalendar().then(function(){if(TAB==="more")paintMore()});
+}
+function paintMore(){
+  var sys=SYS||{};
+  var h=pageTitle("More");
+  var isDark=document.documentElement.getAttribute("data-theme")!=="light";
+  h+="<div class=panel><h3>Settings</h3>"+
+    "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Theme</div><button class='btn sec' onclick='toggleTheme()'>"+(isDark?"◐ Dark":"◑ Light")+"</button></div>"+
+    "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Notifications</div><button class='btn sec' id=pushbtn onclick='enablePush()'>🔔 Enable</button></div>"+
+    "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Lock app</div><button class='btn sec' onclick='doLogout()'>Lock</button></div>"+
+    "</div>";
+  if(sys.settings&&sys.settings.length){
+    h+="<div class=panel><h3>Permissions</h3><div class=sub style='margin-bottom:14px'>Nothing is ever sent, bought, or submitted without your OK — that never changes.</div>";
+    sys.settings.forEach(function(s){
+      if(s.kind==="boolean"){
+        var checked=s.value==="true";
+        h+="<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>"+esc(s.label||s.key)+"</div><label style='cursor:pointer;flex-shrink:0;margin-left:10px'><input type=checkbox "+(checked?"checked":"")+" onchange=\"changeSetting('"+s.key+"',this.checked?'true':'false',this)\" style='width:20px;height:20px'></label></div>";
+      } else if(s.kind==="enum"){
+        var opts=s.options||[];
+        h+="<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>"+esc(s.label||s.key)+"</div><select onchange=\"changeSetting('"+s.key+"',this.value,this)\" style='flex-shrink:0;margin-left:10px'>"+opts.map(function(o){return "<option value='"+esc(o.value)+"' "+(o.value===s.value?"selected":"")+">"+esc(o.label||o.value)+"</option>"}).join("")+"</select></div>";
+      }
+    });
+    h+="</div>";
+  }
+  var k=sys.kernel;var tree=sys.tree||[];
+  if(k||tree.length){
+    h+="<div class=panel><h3>Strategy</h3>";
+    if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:14px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px'>Highest leverage now</div><div style='font-size:14.5px;font-weight:500;line-height:1.35'>"+esc(k.top_move)+"</div></div>";
+    if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;margin-bottom:14px'>"+esc(k.digest)+"</div>";
+    tree.filter(function(g){return g.kind==="objective"}).forEach(function(g){
+      var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
+      var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
+      h+="<div style='margin-bottom:11px'><div style='display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>"+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
+    });
+    h+="</div>";
+  }
+  h+="<div class=panel><h3>Calendar</h3>";
+  if(CALDATA&&CALDATA.length){
+    h+=CALDATA.slice(0,6).map(function(e){
+      var d=new Date(e.start_at);
+      var when=e.all_day?d.toLocaleDateString(undefined,{month:"short",day:"numeric"}):d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+      return "<div class=jobcard><div style='min-width:0'><div class=jname style='white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+esc(e.title)+"</div><div class=jmeta>"+esc(when)+"</div></div></div>";
+    }).join("");
+  } else h+="<div class=sub>Nothing on the calendar right now.</div>";
+  h+="<div style='margin-top:12px'><button class='btn sec' onclick='openAddEvent()'>+ Add event</button></div></div>";
+  var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
+  var runsByFn={};(sys.runs||[]).forEach(function(r){(runsByFn[r.fn]=runsByFn[r.fn]||[]).push(r)});
+  h+="<div class=panel><h3>Agents</h3>";
+  AGENTS.forEach(function(a){
+    var running=runningFns[a.fn];var hist=runsByFn[a.fn]||[];
+    var status=running?("running — "+esc(running.detail||"")):(hist[0]?esc(hist[0].detail||"idle"):"idle");
+    h+="<div class=jobcard><div style='display:flex;align-items:center;gap:9px;min-width:0'><span style='width:7px;height:7px;border-radius:50%;background:"+(running?"#fcd34d":"#10b981")+";flex-shrink:0'></span><div style='min-width:0'><div class=jname>"+esc(a.name)+"</div><div class=jmeta style='white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px'>"+status+"</div></div></div></div>";
+  });
+  h+="</div>";
+  if(BOOKS.length)h+="<div class=panel><h3>What it knows</h3>"+BOOKS.map(function(b){return "<div style='margin-bottom:12px'><div style='font-weight:500;font-size:13.5px;margin-bottom:2px'>"+esc(b.project)+"</div><div class=sub>"+esc(b.summary||"—")+"</div></div>";}).join("")+"</div>";
+  var fb=DATA.filter(function(r){return r.project==="Platform"});
+  h+="<div class=panel><h3>Feedback</h3><div class=sub style='margin-bottom:10px'>Want something changed about the app? Say it in Chat — it lands here.</div>"+(fb.length?fb.map(itemCard).join(""):"<div class=sub>Nothing logged yet.</div>")+"</div>";
+  el("view").innerHTML=h;
+  updatePushButtonState();
 }
 var CALDATA=null;
 async function postCal(action,extra){
@@ -322,13 +424,13 @@ async function submitAddEvent(){
   closeDetail();
   CALDATA=null;
   toast("Added — syncing to Google Calendar…");
-  if(TAB==="calendar")renderCalendar();
+  if(TAB==="more")renderMore();
 }
 var SYS=null;
 async function fetchSystem(){var r;try{r=await fetch(FN+"/system-status",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;SYS=await r.json();renderAgentStrip();return SYS}
 var DAILY_PLAN=null;
 async function fetchDailyPlan(){var r;try{r=await fetch(FN+"/daily-plan",{headers:{authorization:"Bearer "+tok()}})}catch(e){return null}if(!r.ok)return null;var d=await r.json().catch(function(){return {}});DAILY_PLAN=d.plan||null;return DAILY_PLAN}
-async function toggleDailyItem(planDate,idx){await fetch(FN+"/daily-plan",{method:"POST",headers:authHeaders(),body:JSON.stringify({action:"toggleItem",plan_date:planDate,index:idx})});await fetchDailyPlan();renderBoard()}
+async function toggleDailyItem(planDate,idx){await fetch(FN+"/daily-plan",{method:"POST",headers:authHeaders(),body:JSON.stringify({action:"toggleItem",plan_date:planDate,index:idx})});await fetchDailyPlan();if(TAB==="todo")renderTodo()}
 function renderDailyPlanCard(){
   if(!DAILY_PLAN)return "";
   var p=DAILY_PLAN;var list=Array.isArray(p.checklist)?p.checklist:[];
@@ -441,7 +543,14 @@ function paintMind(sys){
 
     el("view").innerHTML=h;
 }
-function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="mind")renderMind();else renderFeedback()}
+function renderCurrent(){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});
+  var cw=el("composewrap");if(cw)cw.style.display=(TAB==="chat")?"block":"none";
+  if(TAB==="todo")renderTodo();
+  else if(TAB==="chat")renderChat();
+  else if(TAB==="output")renderOutput();
+  else renderMore();
+}
 
 // ---- item detail: view, edit, dispatch ----
 function openDetail(id){
@@ -574,10 +683,6 @@ el("cap").addEventListener("keydown",function(e){if(e.key==="Enter")doCapture()}
 el("micgo").addEventListener("click",function(){startVoice("cap",el("micgo"))});
 el("addgo").addEventListener("click",openAddTask);
 document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;renderCurrent()})});
-el("logout").addEventListener("click",function(){if(confirm("Lock the app? You'll need your password to get back in."))
-  {localStorage.removeItem("ts_token");location.reload()}});
-el("themebtn").addEventListener("click",function(){var cur=document.documentElement.getAttribute("data-theme");var next=cur==="dark"?"light":"dark";localStorage.setItem("ts_theme",next);applyTheme(next);if(TAB==="mind")renderMind()});
-el("pushbtn").addEventListener("click",enablePush);
 el("modal").addEventListener("click",function(e){if(e.target===el("modal"))closeDetail()});
 
 async function post(action,password){
@@ -598,7 +703,7 @@ async function updatePushButtonState(){
   try{
     var reg=await navigator.serviceWorker.getRegistration();
     var sub=reg?await reg.pushManager.getSubscription():null;
-    btn.textContent=sub?"🔔":"🔕";
+    btn.textContent=sub?"🔔 On":"🔔 Enable";
     btn.title=sub?"Notifications on — click to disable":"Enable push notifications";
   }catch(e){}
 }
@@ -644,16 +749,16 @@ async function handleDeepLinks(){
 }
 var LIVE_TIMER=null;
 function startLive(){
-  el("livedot").style.display="inline-block";
+  var ld=el("livedot");if(ld)ld.style.display="inline-block";
   fetchSystem();
-  fetchDailyPlan().then(function(){if(TAB==="board")renderBoard()});
+  fetchDailyPlan().then(function(){if(TAB==="todo")renderTodo()});
   if(LIVE_TIMER)return;
   LIVE_TIMER=setInterval(async function(){
     if(document.hidden)return;
     var res=await fetchData();
-    el("livedot").classList.toggle("off",res==="offline");
+    var ld2=el("livedot");if(ld2)ld2.classList.toggle("off",res==="offline");
     fetchSystem();
-    fetchDailyPlan().then(function(){if(TAB==="board")renderBoard()});
+    fetchDailyPlan().then(function(){if(TAB==="todo")renderTodo()});
   },6000);
 }
 async function boot(){
