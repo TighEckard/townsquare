@@ -564,39 +564,46 @@ async function doComplete(id){await postAct("complete",{id:id});closeDetail();aw
 async function doReopen(id){await postAct("reopen",{id:id});closeDetail();await fetchData();toast("Reopened")}
 async function doCapture(){var t=el("cap").value.trim();if(!t)return;el("cap").value="";toast("Captured — sorting…");await postAct("capture",{text:t});setTimeout(async function(){await fetchData();toast("Sorted")},2600)}
 
-// ---- voice input (Web Speech API — free, on-device, no backend) ----
-var activeRecognition=null;
-function startVoice(targetId,btn){
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast("Voice input isn't supported in this browser — try Chrome, or just type.");return}
-  if(activeRecognition){try{activeRecognition.abort()}catch(e){}activeRecognition=null;return}
-  var r=new SR();
-  r.continuous=false;
-  r.interimResults=true;
-  r.lang="en-US";
-  var timeoutId=null;
-  var reset=function(){if(timeoutId){clearTimeout(timeoutId);timeoutId=null}activeRecognition=null;btn.classList.remove("listening");btn.textContent="🎤"};
-  r.onresult=function(e){
-    if(timeoutId){clearTimeout(timeoutId);timeoutId=null}
-    var t="";
-    for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;
-    el(targetId).value=t;
+// ---- voice input (records real audio, transcribes server-side via Groq Whisper — same engine Telegram voice notes use) ----
+var activeRecorder=null;
+function pickMimeType(){
+  var cands=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"];
+  for(var i=0;i<cands.length;i++){if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(cands[i]))return cands[i]}
+  return "";
+}
+async function startVoice(targetId,btn){
+  if(activeRecorder){try{activeRecorder.stop()}catch(e){}return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast("Voice input isn't supported in this browser — try Chrome or Safari, or just type.");return}
+  var stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){toast("Microphone access denied — check Settings > Town Square > Microphone.");return}
+  var mimeType=pickMimeType();
+  var rec;
+  try{rec=mimeType?new MediaRecorder(stream,{mimeType:mimeType}):new MediaRecorder(stream)}
+  catch(e){stream.getTracks().forEach(function(t){t.stop()});toast("Couldn't start recording.");return}
+  var chunks=[];
+  rec.ondataavailable=function(e){if(e.data&&e.data.size>0)chunks.push(e.data)};
+  var maxTimer=setTimeout(function(){if(activeRecorder===rec){try{rec.stop()}catch(e){}}},90000);
+  rec.onstop=async function(){
+    clearTimeout(maxTimer);
+    activeRecorder=null;
+    stream.getTracks().forEach(function(t){t.stop()});
+    btn.classList.remove("listening");btn.textContent="🎤";
+    var blob=new Blob(chunks,{type:rec.mimeType||mimeType||"audio/webm"});
+    if(blob.size<400)return; // essentially silent/instant tap — nothing to send
+    btn.disabled=true;
+    var ext=(rec.mimeType||"").indexOf("mp4")>=0?"m4a":(rec.mimeType||"").indexOf("ogg")>=0?"ogg":"webm";
+    var fd=new FormData();fd.append("audio",blob,"voice."+ext);
+    try{
+      var r=await fetch(FN+"/transcribe",{method:"POST",headers:{authorization:"Bearer "+tok()},body:fd});
+      var d=await r.json().catch(function(){return {}});
+      if(d.text)el(targetId).value=d.text;else toast(d.error||"Couldn't transcribe that — try again.");
+    }catch(e){toast("Couldn't reach transcription — check your connection.")}
+    btn.disabled=false;
   };
-  r.onend=reset;
-  r.onerror=function(e){reset();if(e.error!=="aborted")toast("Voice input error: "+e.error)};
-  try{
-    r.start();activeRecognition=r;btn.classList.add("listening");btn.textContent="⏹";
-    // Safety net: on iOS, the native "Access Speech Recognition" permission dialog can silently fail to appear
-    // inside an installed home-screen PWA, leaving recognition hung forever with no event ever firing.
-    timeoutId=setTimeout(function(){
-      if(activeRecognition===r){
-        try{r.abort()}catch(e){}
-        reset();
-        toast("Voice input didn't respond — try again, or open this in Safari directly (not the installed app) once to grant mic access.");
-      }
-    },10000);
-  }
-  catch(e){reset()}
+  rec.start();
+  activeRecorder=rec;
+  btn.classList.add("listening");btn.textContent="⏹";
 }
 
 // ---- structured add-task modal ----
