@@ -10,6 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon.svg">
 <title>Town Square</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#0e0f13;--card:#181b21;--card2:#20242d;--bd:#2a2e38;--tx:#f2f3f5;--mut:#98a0ac;--ac:#818cf8;--ac2:#a5b4fc;--acsoft:#282a4d;--sat:1.4}
 [data-theme="light"]{--bg:#f2f3f6;--card:#ffffff;--card2:#f4f6f9;--bd:#e5e8ec;--tx:#111418;--mut:#68707c;--ac:#5b63e6;--ac2:#4f46e5;--acsoft:#eceeff}
@@ -671,6 +672,10 @@ function openDetail(id){
   h+="<div id=editwrap></div><div class=mact id=mact></div>";
   el("modalCard").innerHTML=h;
   var acts=el("mact");var btns="";
+  if(r.result){
+    btns+="<button class='btn sec' onclick=\"downloadPDF('"+r.id+"')\">📄 PDF</button>";
+    btns+="<button class='btn sec' onclick=\"sendToChat('"+r.id+"')\">💬 Revise in chat</button>";
+  }
   btns+="<button class='btn gho' onclick=\"toggleEdit('"+r.id+"')\">Edit</button>";
   if(r.status==="done"){btns+="<button class='btn gho' onclick=\"doReopen('"+r.id+"')\">Reopen</button>";}
   else{
@@ -704,6 +709,30 @@ async function saveEdit(id){
   openDetail(id);
 }
 function closeDetail(){el("modal").style.display="none"}
+function downloadPDF(id){
+  var r=DATA.filter(function(x){return String(x.id)===String(id)})[0];if(!r||!r.result)return;
+  if(!window.jspdf||!window.jspdf.jsPDF){toast("PDF tool still loading — try again in a moment.");return}
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});
+  var margin=54,maxW=doc.internal.pageSize.getWidth()-margin*2,ph=doc.internal.pageSize.getHeight(),y=margin;
+  doc.setFont("helvetica","bold");doc.setFontSize(15);
+  doc.splitTextToSize(r.title||r.raw_text||"Deliverable",maxW).forEach(function(l){if(y>ph-margin){doc.addPage();y=margin}doc.text(l,margin,y);y+=19});
+  y+=6;doc.setDrawColor(200);doc.line(margin,y,margin+maxW,y);y+=16;
+  doc.setFont("helvetica","normal");doc.setFontSize(10.5);
+  (r.result||"").split("\n").forEach(function(p){
+    if(p.trim()===""){y+=7;return}
+    doc.splitTextToSize(p,maxW).forEach(function(l){if(y>ph-margin){doc.addPage();y=margin}doc.text(l,margin,y);y+=14.5});
+  });
+  doc.save((r.title||"deliverable").replace(/[^a-z0-9]+/gi,"-").toLowerCase().replace(/^-|-$/g,"").slice(0,50)+".pdf");
+  toast("PDF downloaded");
+}
+function sendToChat(id){
+  var r=DATA.filter(function(x){return String(x.id)===String(id)})[0];if(!r)return;
+  closeDetail();
+  TAB="chat";CHAT_FORCE_BOTTOM=true;MORE_VIEW=null;
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab==="chat")});
+  renderCurrent();
+  var cap=el("cap");if(cap){cap.value="Revise \""+(r.title||"")+"\": ";autogrow(cap);el("capgo").disabled=!cap.value.trim();cap.focus();}
+}
 async function doDispatch(id){var b=el("dispbtn");if(b){b.disabled=true;b.textContent="Agent working… (up to a minute)"}var res=await postAct("dispatch",{id:id});await fetchData();if(res&&res.error){toast("Agent could not finish")}else{toast("Agent finished")}openDetail(id)}
 async function doComplete(id){await postAct("complete",{id:id});closeDetail();await fetchData();toast("Marked done")}
 async function doReopen(id){await postAct("reopen",{id:id});closeDetail();await fetchData();toast("Reopened")}
