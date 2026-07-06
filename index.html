@@ -10,7 +10,6 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon.svg">
 <title>Town Square</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 :root{--bg:#0e0f13;--card:#181b21;--card2:#20242d;--bd:#2a2e38;--tx:#f2f3f5;--mut:#98a0ac;--ac:#818cf8;--ac2:#a5b4fc;--acsoft:#282a4d;--sat:1.4}
 [data-theme="light"]{--bg:#f2f3f6;--card:#ffffff;--card2:#f4f6f9;--bd:#e5e8ec;--tx:#111418;--mut:#68707c;--ac:#5b63e6;--ac2:#4f46e5;--acsoft:#eceeff}
@@ -168,7 +167,6 @@ button{font-family:inherit;cursor:pointer}
       <button class="cbtn send" id="capgo" title="Send">↑</button>
     </div>
     <button class="addlink" id="addgo">＋ Add a detailed task</button>
-    <div id="agentstrip" class="agentstrip"></div>
     <div id="view"></div>
   </div>
   <nav class="bottomnav">
@@ -259,7 +257,7 @@ function renderBoard(){
 }
 function renderFeedback(){
   var items=DATA.filter(function(r){return r.project==="Platform"});
-  var h="<div class=panel><h3>Feature requests &amp; feedback about this app</h3><div class=sub>Dump anything you want changed about Town Square itself — a new field, a different layout, a new integration. It lands here so it doesn't get lost, and gets reviewed and shipped in upcoming updates.</div></div>";
+  var h="<div class=panel><h3>Feedback</h3><div class=sub>Anything you want changed about the app — dump it here and it gets shipped.</div></div>";
   h+=items.length?items.map(itemCard).join(""):"<div class=empty>Nothing logged yet.</div>";
   el("view").innerHTML=h;
 }
@@ -291,7 +289,7 @@ function renderCalendar(){
   el("view").innerHTML="<div class=empty>Loading your calendar…</div>";
   fetchCalendar().then(function(data){
     if(TAB!=="calendar")return;
-    var h="<div class=calhdr><div class=sub>Synced with your Google Calendar — added here, it shows up there too.</div><button class='btn icon' onclick=openAddEvent()>+ Add event</button></div>";
+    var h="<div class=calhdr><div class=sub>Synced with Google Calendar</div><button class='btn icon' onclick=openAddEvent()>+ Add</button></div>";
     if(!data||!data.length){h+="<div class=empty>Nothing on the calendar in the next 60 days.</div>";el("view").innerHTML=h;return}
     var groups={};var order=[];
     data.forEach(function(e){var k=String(e.start_at).slice(0,10);if(!groups[k]){groups[k]=[];order.push(k)}groups[k].push(e)});
@@ -370,48 +368,39 @@ function renderMind(){
 function paintMind(sys){
     var h="";
 
-    // 0. Strategy — the kernel's read: the one-page digest, the top move, and the priced goal tree.
+    // Strategy — top move, digest, priced objectives.
     var k=sys.kernel;var tree=sys.tree||[];
     if(k||tree.length){
-      h+="<div class=panel><h3>🎯 Strategy — the kernel's read</h3>";
-      if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:10px;padding:10px 12px;margin-bottom:10px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px'>Highest leverage right now</div><div style='font-size:14px;font-weight:500'>"+esc(k.top_move)+"</div></div>";
-      if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;line-height:1.5;margin-bottom:12px'>"+esc(k.digest)+"</div>";
-      var objs=tree.filter(function(g){return g.kind==="objective"});
-      var maxEv=Math.max.apply(null,objs.map(function(g){return Number(g.expected_value_usd)||0}).concat([1]));
-      if(objs.length){
-        h+="<div style='margin-top:6px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px'>Where effort is going (kernel-priced)</div>";
-        objs.forEach(function(g){
-          var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
-          var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
-          h+="<div style='margin-bottom:9px'><div style='display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>pri "+Math.round(pri)+" · "+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
-        });
-        h+="</div>";
-      }
-      if(sys.attention)h+="<div class=sub style='margin-top:10px;font-size:12px'>👆 Approvals surfaced today: "+(Number(sys.attention.spent_amount)||0)+"/"+(Number(sys.attention.limit_amount)||0)+" (past the cap they queue quietly here instead of pinging you)</div>";
-      if(sys.llm_today)h+="<div class=sub style='font-size:12px;margin-top:4px'>🔋 LLM spend today: ~$"+Number(sys.llm_today.cost_usd).toFixed(2)+" ("+Math.round((Number(sys.llm_today.input_tokens)+Number(sys.llm_today.output_tokens))/1000)+"k tokens)</div>";
-      if(sys.pendingApprovals&&sys.pendingApprovals.length){
-        h+="<div style='margin-top:10px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px'>⚠️ Waiting on your OK</div>";
-        sys.pendingApprovals.forEach(function(a){
-          var oc=a.item_id?" onclick=\"openDetail('"+a.item_id+"')\"":"";
-          h+="<div class=item"+oc+"><div class=t>"+esc(a.summary)+(a.suppressed?" <span class=sub>(quiet — tap budget hit)</span>":"")+"</div><div class=m><span class=sub>"+esc(a.requested_by)+" · "+timeAgo(a.created_at)+"</span></div></div>";
-        });
-        h+="</div>";
-      }
-      if(k&&k.created_at)h+="<div class=sub style='margin-top:8px;font-size:11px;opacity:.7'>Kernel last ran "+timeAgo(k.created_at)+"</div>";
+      h+="<div class=panel><h3>Strategy</h3>";
+      if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:14px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px'>Highest leverage now</div><div style='font-size:14.5px;font-weight:500;line-height:1.35'>"+esc(k.top_move)+"</div></div>";
+      if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;margin-bottom:14px'>"+esc(k.digest)+"</div>";
+      tree.filter(function(g){return g.kind==="objective"}).forEach(function(g){
+        var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
+        var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
+        h+="<div style='margin-bottom:11px'><div style='display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>"+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
+      });
+      h+="</div>";
+    }
+    if(sys.pendingApprovals&&sys.pendingApprovals.length){
+      h+="<div class=panel><h3>Waiting on you</h3>";
+      sys.pendingApprovals.forEach(function(a){
+        var oc=a.item_id?" onclick=\"openDetail('"+a.item_id+"')\"":"";
+        h+="<div class=item"+oc+"><div class=t>"+esc(a.summary)+"</div><div class=m><span class=sub>"+timeAgo(a.created_at)+"</span></div></div>";
+      });
       h+="</div>";
     }
 
     // 0.5 Settings — user-editable autonomy dials
     if(sys.settings&&sys.settings.length){
-      h+="<div class=panel><h3>⚙️ Permissions — how much the AI can do on its own</h3><div class=sub style='margin-bottom:10px'>These are the only dials that change what the AI is allowed to do unattended. One boundary never moves no matter how these are set: nothing is ever sent, purchased, or submitted without your one-tap approval first.</div>";
+      h+="<div class=panel><h3>Permissions</h3><div class=sub style='margin-bottom:14px'>Nothing is ever sent, bought, or submitted without your OK — that never changes.</div>";
       sys.settings.forEach(function(s){
         if(s.kind==="boolean"){
           var checked=s.value==="true";
-          h+="<div class=jobcard style='align-items:center'><div style='flex:1'><div class=jname>"+esc(s.label||s.key)+"</div><div class=jmeta style='margin-top:2px'>"+esc(s.description||"")+"</div></div>"+
-            "<label style='display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;margin-left:10px'><input type=checkbox "+(checked?"checked":"")+" onchange=\"changeSetting('"+s.key+"',this.checked?'true':'false',this)\" style='width:18px;height:18px'><span class=sub style='font-size:11px'>"+(checked?"ON":"OFF")+"</span></label></div>";
+          h+="<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>"+esc(s.label||s.key)+"</div>"+
+            "<label style='cursor:pointer;flex-shrink:0;margin-left:10px'><input type=checkbox "+(checked?"checked":"")+" onchange=\"changeSetting('"+s.key+"',this.checked?'true':'false',this)\" style='width:20px;height:20px'></label></div>";
         } else if(s.kind==="enum"){
           var opts=s.options||[];
-          h+="<div class=jobcard style='align-items:center'><div style='flex:1'><div class=jname>"+esc(s.label||s.key)+"</div><div class=jmeta style='margin-top:2px'>"+esc(s.description||"")+"</div></div>"+
+          h+="<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>"+esc(s.label||s.key)+"</div>"+
             "<select onchange=\"changeSetting('"+s.key+"',this.value,this)\" style='flex-shrink:0;margin-left:10px'>"+
             opts.map(function(o){return "<option value='"+esc(o.value)+"' "+(o.value===s.value?"selected":"")+">"+esc(o.label||o.value)+"</option>"}).join("")+
             "</select></div>";
@@ -420,46 +409,29 @@ function paintMind(sys){
       h+="</div>";
     }
 
-    // 1. Live agents — organized per-agent, not a flat log. This is the "watch it work" view.
+    // Agents — compact one-line-per-agent status.
     var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
     var runsByFn={};(sys.runs||[]).forEach(function(r){(runsByFn[r.fn]=runsByFn[r.fn]||[]).push(r)});
-    var jobsByName={};(sys.jobs||[]).forEach(function(j){jobsByName[j.jobname]=j});
-    h+="<div class=panel><h3>🧠 Live agents</h3><div class=sub style='margin-bottom:10px'>What's running right now, and what each one did last.</div>";
+    h+="<div class=panel><h3>Agents</h3>";
     AGENTS.forEach(function(a){
-      var running=runningFns[a.fn];
-      var hist=runsByFn[a.fn]||[];
-      var job=a.jobname?jobsByName[a.jobname]:null;
-      var statusLine=running?("⏳ Running — "+esc(running.detail||"")+" · started "+timeAgo(running.started_at)):
-        (hist[0]?("🟢 Idle — last: "+esc(hist[0].detail||"")+" · "+timeAgo(hist[0].started_at)):"🟢 Idle — no runs logged yet");
-      var cronLine=job?("cron ticking · last checked "+timeAgo(job.last_run_at)):"";
-      h+="<div class=jobcard style='align-items:flex-start'><div style='flex:1'>"+
-        "<div class=jname>"+esc(a.name)+"</div><div class=jmeta>"+esc(a.desc)+"</div>"+
-        "<div class=jmeta style='margin-top:6px;color:var(--tx)'>"+statusLine+"</div>"+
-        (hist.length>1?("<div class=jmeta style='margin-top:4px'>"+hist.slice(1,3).map(function(r){return timeAgo(r.started_at)+": "+esc(r.detail||"");}).join(" · ")+"</div>"):"")+
-        (cronLine?("<div class=jmeta style='margin-top:4px;opacity:.7'>"+cronLine+"</div>"):"")+
-        "</div></div>";
+      var running=runningFns[a.fn];var hist=runsByFn[a.fn]||[];
+      var status=running?("running — "+esc(running.detail||"")):(hist[0]?esc(hist[0].detail||"idle"):"idle");
+      h+="<div class=jobcard><div style='display:flex;align-items:center;gap:9px;min-width:0'><span style='width:7px;height:7px;border-radius:50%;background:"+(running?"#fcd34d":"#10b981")+";flex-shrink:0'></span><div style='min-width:0'><div class=jname>"+esc(a.name)+"</div><div class=jmeta style='white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px'>"+status+"</div></div></div></div>";
     });
     h+="</div>";
 
-    // 2. Standing goals
-    if(sys.goals&&sys.goals.length){
-      h+="<div class=panel><h3>🎯 Standing goals</h3>";
-      sys.goals.forEach(function(g){h+="<div class=jobcard><div><div class=jname>"+esc(g.goal_text)+"</div><div class=jmeta>"+esc(g.project)+"</div></div><div class=jmeta>pursued "+timeAgo(g.last_pursued_at)+"</div></div>";});
-      h+="</div>";
-    }
-
-    // 3. The library (book summaries)
+    // What it knows — book summaries.
     if(BOOKS.length){
-      h+="<div class=panel><h3>📚 The library — what the AI currently understands</h3><div class=sub style='margin-bottom:10px'>Refreshed automatically by the reflection pass, not by you.</div>"+
-        BOOKS.map(function(b){return "<div style='margin-bottom:10px'><div style='font-weight:500;font-size:13px'>"+esc(b.project)+"</div><div class=sub style='font-size:12.5px'>"+esc(b.summary||"(no summary yet)")+"</div></div>";}).join("")+
+      h+="<div class=panel><h3>What it knows</h3>"+
+        BOOKS.map(function(b){return "<div style='margin-bottom:12px'><div style='font-weight:500;font-size:13.5px;margin-bottom:2px'>"+esc(b.project)+"</div><div class=sub>"+esc(b.summary||"—")+"</div></div>";}).join("")+
         "</div>";
     }
 
-    // 4. Standalone context notes
+    // Notes.
     if(NOTES.length){
       var groups={};var order=[];
       NOTES.forEach(function(n){var p=n.project||"Other";if(!groups[p]){groups[p]=[];order.push(p)}groups[p].push(n)});
-      h+="<div class=panel><h3>📎 Context notes</h3><div class=sub style='margin-bottom:10px'>Background knowledge the AI has filed — facts that didn't need to become tasks.</div>"+
+      h+="<div class=panel><h3>Notes</h3>"+
         order.map(function(p){
           return "<div class=daygroup><h4>"+esc(p)+"</h4>"+groups[p].map(function(n){
             return "<div class=evt><div class=body><div class=title>"+esc(n.text)+"</div><div class=loc>"+new Date(n.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+"</div></div></div>";
@@ -467,45 +439,7 @@ function paintMind(sys){
         }).join("")+"</div>";
     }
 
-    // 5. Charts
-    var open=DATA.filter(isOpen);var agentCan=open.filter(function(r){return r.agent_doable}).length;var mine=open.length-agentCan;
-    h+="<div class=panel><h3>Who acts on it</h3><canvas id=c1 height=150></canvas></div><div class=panel><h3>Open items by project</h3><canvas id=c2 height=150></canvas></div>";
-
-    // 6. Recent activity feed
-    if(sys.activity&&sys.activity.length){
-      h+="<div class=panel><h3>Recent activity</h3><div class=sub style='margin-bottom:10px'>What's actually happened, most recent first.</div><div class=acttl>";
-      sys.activity.forEach(function(a){
-        var icon=a.kind==="note"?"📎":(a.proactive?"💡":(a.source==="telegram"||a.source==="web"?"💬":"⚙️"));
-        var src=a.source==="goal_pursuit"?"goal pursuit":a.source==="reflection"?"reflection":a.source==="triage_split"?"triage":esc(a.source||"");
-        h+="<div class=actrow><div class=acticon>"+icon+"</div><div class=actbody><div class=actt>"+esc(a.title)+"</div><div class=actm>"+esc(a.project||"")+" · "+src+" · "+timeAgo(a.at)+"</div></div></div>";
-      });
-      h+="</div></div>";
-    }
-
-    // 7. How it works — static reference, least "live," lowest priority placement
-    h+="<div class=panel><h3>How it actually works</h3><div class=sub style='margin-bottom:12px'>The real pipeline — not a mockup.</div>";
-    h+="<div class=pipeline>"+
-      "<div class=pstage><span class='pdot live'></span><div><div class=pname>You dump a thought</div><div class=pdesc>Telegram, voice, or the box above — always on</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot live'></span><div><div class=pname>Triage</div><div class=pdesc>splits it: attach to something existing, file as background, or invent a task</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot live'></span><div><div class=pname>Library (books)</div><div class=pdesc>one summary per project — the AI's index, not one giant blob</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot live'></span><div><div class=pname>Reflection + Goal pursuit</div><div class=pdesc>runs on its own — finds cross-project insights, researches your goals, reminds you of open decisions</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot manual'></span><div><div class=pname>Dispatch</div><div class=pdesc>you tap it — LLM tasks get drafted immediately; 🌐 browser tasks get queued</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot cond'></span><div><div class=pname>🌐 Browser worker</div><div class=pdesc>every 15 min, drives real Chrome — scouts freely, but stops before any send/order/submit to ask first. Needs your computer on</div></div></div>"+
-      "<div class=parrow>↓</div>"+
-      "<div class=pstage><span class='pdot manual'></span><div><div class=pname>You</div><div class=pdesc>the one checkpoint for anything real-world or irreversible</div></div></div>"+
-      "</div></div>";
-
     el("view").innerHTML=h;
-    if(chart1)chart1.destroy();if(chart2)chart2.destroy();
-    chart1=new Chart(el("c1"),{type:"doughnut",data:{labels:["Agent can handle","Your calls"],datasets:[{data:[agentCan,mine],backgroundColor:["#10b981","#8b5cf6"],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{color:getComputedStyle(document.body).color}}}}});
-    var ps=Array.from(new Set(open.map(function(r){return r.project||"Other"})));
-    var COLORS=["#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#6b7280","#ef4444"];
-    chart2=new Chart(el("c2"),{type:"bar",data:{labels:ps,datasets:[{data:ps.map(function(p){return open.filter(function(r){return (r.project||"Other")===p}).length}),backgroundColor:ps.map(function(_,i){return COLORS[i%COLORS.length]}),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:getComputedStyle(document.body).color}},x:{ticks:{color:getComputedStyle(document.body).color}}}}});
 }
 function renderCurrent(){document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===TAB)});if(TAB==="board")renderBoard();else if(TAB==="calendar")renderCalendar();else if(TAB==="chat")renderChat();else if(TAB==="mind")renderMind();else renderFeedback()}
 

@@ -1,6 +1,15 @@
 self.addEventListener("install", function(e){ self.skipWaiting(); });
 self.addEventListener("activate", function(e){ e.waitUntil(self.clients.claim()); });
-self.addEventListener("fetch", function(){});
+// Always fetch the app shell (HTML) fresh from the network so redesigns/updates
+// reach the installed PWA immediately instead of being served stale from cache.
+self.addEventListener("fetch", function(event){
+  var req = event.request;
+  var accept = req.headers.get("accept") || "";
+  var isHTML = req.mode === "navigate" || accept.indexOf("text/html") >= 0;
+  if (req.method === "GET" && isHTML){
+    event.respondWith(fetch(req, { cache: "no-store" }).catch(function(){ return fetch(req); }));
+  }
+});
 
 self.addEventListener("push", function(event){
   var data = {};
