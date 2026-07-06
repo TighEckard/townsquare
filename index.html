@@ -269,7 +269,7 @@ function renderChat(){
   var h=pageTitle("Chat")+"<div class=chat>"+arr.map(function(g){
     var when=new Date(g.created_at).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
     var src=g.items[0].source||"";
-    var you="<div class=bubblewrap you><div class='bubble you'>"+esc(g.raw)+"</div></div><div class=chattime>"+esc(when)+(src?" · "+esc(src):"")+"</div>";
+    var you="<div class=\"bubblewrap you\"><div class='bubble you'>"+esc(g.raw)+"</div></div><div class=chattime>"+esc(when)+(src?" · "+esc(src):"")+"</div>";
     var chips=g.items.map(function(it){
       var working=it.status==="agent_working"||it.status==="browser_working";
       var lead=working?"<span class=wdot></span>":(it.agent_doable?"🤖 ":"");
