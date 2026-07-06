@@ -675,12 +675,21 @@ async function boot(){
     await trySilentPushResubscribe();
     return;
   }
-  var s=await post("status","");
-  MODE=(s.data&&s.data.configured)?"login":"setup";
-  el("lgtitle").textContent=MODE==="setup"?"Create a password":"Welcome back";
-  el("lgsub").textContent=MODE==="setup"?"Set a password to lock your Town Square. You only enter it once on this device — it's remembered from then on.":"Enter your password to unlock.";
-  el("go").textContent=MODE==="setup"?"Create and open":"Unlock";
+  // Show the login form immediately with a safe default — never make first paint
+  // depend on a network round-trip. If the status check later says "not configured
+  // yet", upgrade the form to setup mode in place.
+  MODE="login";
+  el("lgtitle").textContent="Welcome back";
+  el("lgsub").textContent="Enter your password to unlock.";
+  el("go").textContent="Unlock";
   show("login");
+  var s=await post("status","");
+  if(s.ok&&s.data&&s.data.configured===false){
+    MODE="setup";
+    el("lgtitle").textContent="Create a password";
+    el("lgsub").textContent="Set a password to lock your Town Square. You only enter it once on this device — it's remembered from then on.";
+    el("go").textContent="Create and open";
+  }
 }
 el("go").addEventListener("click",submit);
 el("pw").addEventListener("keydown",function(e){if(e.key==="Enter")submit()});
