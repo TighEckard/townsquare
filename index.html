@@ -542,7 +542,10 @@ function renderDailyPlanCard(){
 }
 function timeAgo(iso){if(!iso)return "never";var s=(Date.now()-new Date(iso).getTime())/1000;if(s<60)return "just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
 var AGENTS=[
+  {fn:"executive",name:"🧭 Executive",desc:"every 2 hrs — reviews everything, spins up agent work, nudges you, proposes automations",jobname:"executive-every-2h"},
   {fn:"kernel",name:"🧠 Kernel",desc:"daily ~7am — prices every objective by dollar leverage, sets the day's strategy",jobname:"kernel-daily"},
+  {fn:"auto-dispatch",name:"⚡ Auto-dispatch",desc:"every 30 min — runs agent-doable tasks automatically, results land in Output",jobname:"auto-dispatch-every-30min"},
+  {fn:"morning-brief",name:"📰 Morning brief",desc:"daily ~11am ET — searches the web, sends your AI news brief",jobname:"morning-brief-daily"},
   {fn:"triage",name:"Triage",desc:"sorts every dump — context vs. new task",jobname:"triage-every-minute"},
   {fn:"reflection",name:"Reflection",desc:"reviews everything, reminds you of open decisions",jobname:"reflection-twice-daily"},
   {fn:"goal-pursuit",name:"Goal pursuit",desc:"pursues the kernel's top-priority objective, proposes next steps",jobname:"goal-pursuit-daily"},
