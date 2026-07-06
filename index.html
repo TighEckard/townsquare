@@ -30,22 +30,24 @@ button{font-family:inherit;cursor:pointer}
 .btn.icon{height:42px;min-width:42px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:15px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:13px;font-weight:500}
 .btn:active{transform:scale(.95);opacity:.9}
 .btn:disabled{opacity:.5}
-.compose{display:flex;align-items:flex-end;gap:7px;background:var(--card);border:1px solid var(--bd);border-radius:24px;padding:7px}
-.compose textarea{flex:1;min-width:0;border:none;background:none;color:var(--tx);font-size:16px;line-height:1.4;padding:9px 6px;outline:none;font-family:inherit;resize:none;max-height:150px;overflow-y:auto}
+.compose{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:26px;padding:14px 15px 11px}
+.compose textarea{width:100%;border:none;background:none;color:var(--tx);font-size:16px;line-height:1.45;padding:2px 4px;outline:none;font-family:inherit;resize:none;max-height:180px;overflow-y:auto}
 .compose textarea::placeholder{color:var(--mut)}
-.cbtn{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:none;background:var(--card2);color:var(--tx);font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .1s}
+.crow{display:flex;align-items:center;justify-content:space-between}
+.cgroup{display:flex;gap:8px}
+.cbtn{flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;background:var(--card2);color:var(--tx);font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .1s}
 .cbtn:active{transform:scale(.9)}
-.cbtn.ghost{background:none;border:1px solid var(--bd);color:var(--mut);font-size:20px;font-weight:400}
-.cbtn.send{background:var(--ac);color:#fff;font-weight:700}
+.cbtn.ghost{background:none;border:1px solid var(--bd);color:var(--mut);font-size:21px;font-weight:400}
+.cbtn.send{background:var(--ac);color:#fff;font-weight:700;font-size:18px}
 .cbtn.send:disabled{background:var(--card2);color:var(--mut);opacity:1}
 .cbtn.listening{background:#dc2626;color:#fff;animation:micpulse 1.1s infinite}
 /* Default: compose hidden. On the Chat tab (body.chat-mode) it docks to the bottom, above the nav, like a messaging app. */
 #composewrap{display:none}
-body.chat-mode #composewrap{display:block;position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 57px);z-index:25;padding:10px 14px 14px;background:var(--bg);background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(20px) saturate(var(--sat));backdrop-filter:blur(20px) saturate(var(--sat));border-top:1px solid color-mix(in srgb,var(--bd) 55%,transparent)}
-body.chat-mode .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
-.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--bg);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(20px) saturate(var(--sat));backdrop-filter:blur(20px) saturate(var(--sat));border-top:1px solid color-mix(in srgb,var(--bd) 55%,transparent);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 0 7px;background:none;border:none;color:var(--mut);font-size:10.5px;font-weight:500;transition:color .15s}
-.tab svg{width:24px;height:24px;display:block}
+body.chat-mode #composewrap{display:block;position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 50px);z-index:25;padding:9px 14px 12px;background:var(--bg);background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(20px) saturate(var(--sat));backdrop-filter:blur(20px) saturate(var(--sat));border-top:1px solid color-mix(in srgb,var(--bd) 55%,transparent)}
+body.chat-mode .wrap{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--bg);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(20px) saturate(var(--sat));backdrop-filter:blur(20px) saturate(var(--sat));border-top:1px solid color-mix(in srgb,var(--bd) 50%,transparent);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0 5px;background:none;border:none;color:var(--mut);font-size:9.5px;font-weight:500;letter-spacing:.01em;transition:color .15s}
+.tab svg{width:21px;height:21px;display:block}
 .tab.on{color:var(--ac)}
 .tab:active{opacity:.55}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:18px 0}
@@ -141,6 +143,20 @@ body.chat-mode .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px)
 .section{margin-bottom:24px}
 .section h4{font-size:12px;color:var(--mut);margin:0 0 12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
 .wdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#fcd34d;margin-right:7px;box-shadow:0 0 0 rgba(252,211,77,.5);animation:pulse 1.4s infinite;vertical-align:middle;flex-shrink:0}
+.spinner{width:15px;height:15px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .75s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.menurow{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--bd);border-radius:15px;padding:15px 16px;margin-bottom:10px;cursor:pointer;transition:transform .1s}
+.menurow:active{transform:scale(.99)}
+.menurow .mi{font-size:22px;width:26px;text-align:center;flex-shrink:0}
+.menurow .mt{flex:1;min-width:0}
+.menurow .mt .mtt{font-size:15.5px;font-weight:600}
+.menurow .mt .mts{font-size:12.5px;color:var(--mut);margin-top:2px}
+.menurow .ma{color:var(--mut);font-size:20px;flex-shrink:0}
+.backrow{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--ac);font-size:14.5px;font-weight:600;padding:4px 0;margin-bottom:12px;cursor:pointer}
+.livebar{display:flex;align-items:center;gap:10px;background:var(--acsoft);border:1px solid var(--ac);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:14px;font-weight:500}
+.agentcard{background:var(--card);border:1px solid var(--bd);border-radius:15px;padding:14px 15px;margin-bottom:10px;cursor:pointer;transition:transform .1s}
+.agentcard:active{transform:scale(.99)}
+.agentcard.live{border-color:var(--ac)}
 @media(min-width:560px){.cards{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:640px){#modal{align-items:center}#modalCard{border-radius:22px;padding-bottom:24px}#modalCard::before{display:none}}
 </style>
@@ -161,10 +177,11 @@ body.chat-mode .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px)
     <div id="offline">Can't reach the server right now — showing your last loaded data. Your login is still saved.</div>
     <div id="composewrap">
       <div class="compose">
-        <button class="cbtn ghost" id="addgo" title="Add a detailed task">＋</button>
-        <textarea id="cap" rows="1" placeholder="Tell it something, or ask it to do something…"></textarea>
-        <button class="cbtn" id="micgo" title="Voice input">🎤</button>
-        <button class="cbtn send" id="capgo" title="Send">↑</button>
+        <textarea id="cap" rows="1" placeholder="Message Town Square…"></textarea>
+        <div class="crow">
+          <div class="cgroup"><button class="cbtn ghost" id="addgo" title="Add a detailed task">＋</button></div>
+          <div class="cgroup"><button class="cbtn" id="micgo" title="Voice input">🎤</button><button class="cbtn send" id="capgo" title="Send">↑</button></div>
+        </div>
       </div>
     </div>
     <div id="view"></div>
@@ -183,7 +200,7 @@ body.chat-mode .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px)
 <script>
 var FN="https://enrybarwjcqpibiqactn.supabase.co/functions/v1";
 var VAPID_PUBLIC_KEY="BNbOQylhDKfRbN8YGRzA3vcJIt61wTGt6tZHTMcImX1lNHatT92UYE7gpmPUTQy-C1sZlao1BbkW-fhqSTnZPMo";
-var DATA=[];var TAB="todo";var MODE="login";var chart1=null,chart2=null;var CHAT_FORCE_BOTTOM=false;
+var DATA=[];var TAB="todo";var MODE="login";var chart1=null,chart2=null;var CHAT_FORCE_BOTTOM=false;var MORE_VIEW=null;
 var PROJECTS=["Ulio","Next venture","Personal","Family","Health","Platform","Other"];
 function el(i){return document.getElementById(i)}
 function tok(){return localStorage.getItem("ts_token")}
@@ -321,17 +338,124 @@ function renderOutput(){
   el("view").innerHTML=h;
 }
 
-// ---- MORE: calendar, strategy, permissions, library, app settings ----
+// ---- MORE: a menu that drills into pages (Agents, Strategy, Calendar, Knowledge, Settings, Feedback) ----
+function moreGo(v){MORE_VIEW=v;window.scrollTo(0,0);renderMore()}
+function moreBack(){MORE_VIEW=null;window.scrollTo(0,0);renderMore()}
 function renderMore(){
-  paintMore();
-  fetchSystem().then(function(){if(TAB==="more")paintMore()});
-  fetchCalendar().then(function(){if(TAB==="more")paintMore()});
+  if(!MORE_VIEW){paintMoreMenu();return}
+  paintMoreSub();
+  fetchSystem().then(function(){if(TAB==="more"&&MORE_VIEW)paintMoreSub()});
+  if(MORE_VIEW==="calendar")fetchCalendar().then(function(){if(TAB==="more"&&MORE_VIEW==="calendar")paintMoreSub()});
 }
-function paintMore(){
+function paintMoreMenu(){
+  var live=(SYS&&SYS.running)?SYS.running.length:0;
+  var rows=[
+    {v:"agents",i:"🧠",t:"Agents",s:live?(live+" working right now"):"Watch what the agents are doing"},
+    {v:"strategy",i:"🎯",t:"Strategy",s:"The kernel's current read"},
+    {v:"calendar",i:"📅",t:"Calendar",s:"Upcoming events"},
+    {v:"knowledge",i:"📚",t:"Knowledge",s:"What it knows about you"},
+    {v:"permissions",i:"⚙️",t:"Permissions & settings",s:"What it can do · theme · lock"},
+    {v:"feedback",i:"💡",t:"Feedback",s:"Request changes to the app"}
+  ];
+  var h=pageTitle("More")+rows.map(function(r){
+    var right=(r.v==="agents"&&live)?"<span class=spinner style='margin-left:auto'></span>":"<span class=ma>›</span>";
+    return "<div class=menurow onclick=\"moreGo('"+r.v+"')\"><div class=mi>"+r.i+"</div><div class=mt><div class=mtt>"+esc(r.t)+"</div><div class=mts>"+esc(r.s)+"</div></div>"+right+"</div>";
+  }).join("");
+  el("view").innerHTML=h;
+}
+function paintMoreSub(){
+  var back="<button class=backrow onclick='moreBack()'>‹ More</button>";
+  var h=back;
+  if(MORE_VIEW==="agents")h=agentsPage();
+  else if(MORE_VIEW==="strategy")h+=strategyPanel();
+  else if(MORE_VIEW==="calendar")h+=calendarPanel();
+  else if(MORE_VIEW==="knowledge")h+=knowledgePanel();
+  else if(MORE_VIEW==="permissions")h+=settingsPanel();
+  else if(MORE_VIEW==="feedback")h+=feedbackPanel();
+  el("view").innerHTML=h;
+  if(MORE_VIEW==="permissions")updatePushButtonState();
+}
+function agentsPage(){
   var sys=SYS||{};
-  var h=pageTitle("More");
+  var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
+  var runsByFn={};(sys.runs||[]).forEach(function(r){(runsByFn[r.fn]=runsByFn[r.fn]||[]).push(r)});
+  var live=(sys.running||[]).length;
+  var h="<button class=backrow onclick='moreBack()'>‹ More</button>"+pageTitle("Agents");
+  h+=live?("<div class=livebar><span class=spinner></span>"+live+" agent"+(live>1?"s":"")+" working right now</div>"):("<div class=sub style='margin:-8px 0 18px'>All agents idle — they wake on their own schedules and whenever you give them something.</div>");
+  h+=AGENTS.map(function(a){
+    var running=runningFns[a.fn];var hist=runsByFn[a.fn]||[];
+    var line=running?("<span class=spinner></span><span style='color:var(--tx)'>"+esc(running.detail||"working…")+"</span>"):("<span style='width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;flex-shrink:0'></span><span class=sub style='min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+(hist[0]?esc(hist[0].detail||"idle"):"idle")+"</span>");
+    var last=hist[0]?(" · "+timeAgo(hist[0].started_at)):"";
+    return "<div class='agentcard"+(running?" live":"")+"' onclick=\"openAgentDetail('"+a.fn+"')\"><div style='display:flex;align-items:center;justify-content:space-between;gap:8px'><div class=jname style='font-size:15.5px'>"+esc(a.name)+"</div><span class=ma>›</span></div><div style='display:flex;align-items:center;gap:8px;margin-top:9px;font-size:13px;min-width:0'>"+line+"</div><div class=jmeta style='margin-top:7px'>"+esc(a.desc)+last+"</div></div>";
+  }).join("");
+  return h;
+}
+function openAgentDetail(fn){
+  var a=AGENTS.filter(function(x){return x.fn===fn})[0];if(!a)return;
+  var sys=SYS||{};
+  var running=(sys.running||[]).filter(function(r){return r.fn===fn})[0];
+  var hist=(sys.runs||[]).filter(function(r){return r.fn===fn});
+  var h="<h2>"+esc(a.name)+"</h2><div class=kv>"+esc(a.desc)+"</div>";
+  if(running)h+="<div class=livebar style='margin-top:14px'><span class=spinner></span>Working now — "+esc(running.detail||"")+"</div>";
+  h+="<div class=kv style='margin-top:16px;font-weight:600'>Recent activity</div>";
+  if(hist.length){
+    h+="<div class=acttl style='margin-top:8px'>"+hist.slice(0,15).map(function(r){
+      var ic=r.status==="running"?"<span class=spinner style='width:12px;height:12px'></span>":(r.status==="failed"?"⚠️":"✓");
+      return "<div class=actrow><div class=acticon>"+ic+"</div><div class=actbody><div class=actt>"+esc(r.detail||r.status)+"</div><div class=actm>"+timeAgo(r.started_at)+(r.status==="failed"?" · failed":r.finished_at?" · done":"")+"</div></div></div>";
+    }).join("")+"</div>";
+  } else h+="<div class=rawnote style='margin-top:8px'>No activity logged yet.</div>";
+  h+="<div class=mact><button class='btn gho' onclick='closeDetail()'>Close</button></div>";
+  el("modalCard").innerHTML=h;
+  el("modal").style.display="flex";
+}
+function strategyPanel(){
+  var sys=SYS||{};var k=sys.kernel;var tree=sys.tree||[];
+  if(!k&&!tree.length)return "<div class=empty>No strategy pass yet.</div>";
+  var h="<div class=pagetitle>Strategy</div>";
+  if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:13px;padding:13px 15px;margin-bottom:16px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px'>Highest leverage now</div><div style='font-size:15px;font-weight:500;line-height:1.4'>"+esc(k.top_move)+"</div></div>";
+  if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;margin-bottom:18px'>"+esc(k.digest)+"</div>";
+  tree.filter(function(g){return g.kind==="objective"}).forEach(function(g){
+    var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
+    var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
+    h+="<div style='margin-bottom:12px'><div style='display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>"+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
+  });
+  return h;
+}
+function calendarPanel(){
+  var h="<div class=pagetitle>Calendar</div><div class=pagesub>Synced with Google Calendar.</div>";
+  h+="<button class='btn sec' style='margin-bottom:16px' onclick='openAddEvent()'>+ Add event</button>";
+  if(CALDATA&&CALDATA.length){
+    var groups={};var order=[];
+    CALDATA.forEach(function(e){var kk=String(e.start_at).slice(0,10);if(!groups[kk]){groups[kk]=[];order.push(kk)}groups[kk].push(e)});
+    h+=order.map(function(kk){
+      var label=new Date(kk+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+      return "<div class=daygroup><h4>"+esc(label)+"</h4>"+groups[kk].map(function(e){
+        return "<div class=evt><div class=time>"+fmtTime(e.start_at,e.all_day)+"</div><div class=body><div class=title>"+esc(e.title)+"</div>"+(e.location?"<div class=loc>"+esc(e.location)+"</div>":"")+"</div></div>";
+      }).join("")+"</div>";
+    }).join("");
+  } else h+="<div class=empty>Nothing on the calendar in the next 60 days.</div>";
+  return h;
+}
+function knowledgePanel(){
+  var h="<div class=pagetitle>Knowledge</div><div class=pagesub>What the AI understands about your world.</div>";
+  if(BOOKS.length)h+="<div class=section><h4>The library</h4>"+BOOKS.map(function(b){return "<div class=panel><div style='font-weight:600;font-size:14px;margin-bottom:4px'>"+esc(b.project)+"</div><div class=sub>"+esc(b.summary||"—")+"</div></div>";}).join("")+"</div>";
+  if(NOTES.length){
+    var groups={};var order=[];
+    NOTES.forEach(function(n){var p=n.project||"Other";if(!groups[p]){groups[p]=[];order.push(p)}groups[p].push(n)});
+    h+="<div class=section><h4>Notes</h4>"+order.map(function(p){
+      return "<div class=daygroup><h4>"+esc(p)+"</h4>"+groups[p].map(function(n){
+        return "<div class=evt><div class=body><div class=title>"+esc(n.text)+"</div><div class=loc>"+new Date(n.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+"</div></div></div>";
+      }).join("")+"</div>";
+    }).join("")+"</div>";
+  }
+  if(!BOOKS.length&&!NOTES.length)h+="<div class=empty>Nothing filed yet.</div>";
+  return h;
+}
+function settingsPanel(){
+  var sys=SYS||{};
   var isDark=document.documentElement.getAttribute("data-theme")!=="light";
-  h+="<div class=panel><h3>Settings</h3>"+
+  var h="<div class=pagetitle>Settings</div>";
+  h+="<div class=panel><h3>App</h3>"+
     "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Theme</div><button class='btn sec' onclick='toggleTheme()'>"+(isDark?"◐ Dark":"◑ Light")+"</button></div>"+
     "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Notifications</div><button class='btn sec' id=pushbtn onclick='enablePush()'>🔔 Enable</button></div>"+
     "<div class=jobcard style='align-items:center'><div class=jname style='flex:1'>Lock app</div><button class='btn sec' onclick='doLogout()'>Lock</button></div>"+
@@ -349,41 +473,13 @@ function paintMore(){
     });
     h+="</div>";
   }
-  var k=sys.kernel;var tree=sys.tree||[];
-  if(k||tree.length){
-    h+="<div class=panel><h3>Strategy</h3>";
-    if(k&&k.top_move)h+="<div style='background:var(--acsoft);border:1px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:14px'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px'>Highest leverage now</div><div style='font-size:14.5px;font-weight:500;line-height:1.35'>"+esc(k.top_move)+"</div></div>";
-    if(k&&k.digest)h+="<div class=sub style='white-space:pre-wrap;margin-bottom:14px'>"+esc(k.digest)+"</div>";
-    tree.filter(function(g){return g.kind==="objective"}).forEach(function(g){
-      var pri=Number(g.priority)||0;var ev=Number(g.expected_value_usd)||0;
-      var evStr=ev>=1000?("$"+Math.round(ev/1000)+"k"):(ev>0?("$"+ev):"—");
-      h+="<div style='margin-bottom:11px'><div style='display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px'><span style='font-weight:500'>"+esc(g.project)+"</span><span class=sub>"+evStr+"</span></div><div style='height:6px;background:var(--card2);border-radius:4px;overflow:hidden'><div style='height:100%;width:"+Math.max(3,Math.min(100,pri))+"%;background:var(--ac)'></div></div></div>";
-    });
-    h+="</div>";
-  }
-  h+="<div class=panel><h3>Calendar</h3>";
-  if(CALDATA&&CALDATA.length){
-    h+=CALDATA.slice(0,6).map(function(e){
-      var d=new Date(e.start_at);
-      var when=e.all_day?d.toLocaleDateString(undefined,{month:"short",day:"numeric"}):d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-      return "<div class=jobcard><div style='min-width:0'><div class=jname style='white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+esc(e.title)+"</div><div class=jmeta>"+esc(when)+"</div></div></div>";
-    }).join("");
-  } else h+="<div class=sub>Nothing on the calendar right now.</div>";
-  h+="<div style='margin-top:12px'><button class='btn sec' onclick='openAddEvent()'>+ Add event</button></div></div>";
-  var runningFns={};(sys.running||[]).forEach(function(r){runningFns[r.fn]=r});
-  var runsByFn={};(sys.runs||[]).forEach(function(r){(runsByFn[r.fn]=runsByFn[r.fn]||[]).push(r)});
-  h+="<div class=panel><h3>Agents</h3>";
-  AGENTS.forEach(function(a){
-    var running=runningFns[a.fn];var hist=runsByFn[a.fn]||[];
-    var status=running?("running — "+esc(running.detail||"")):(hist[0]?esc(hist[0].detail||"idle"):"idle");
-    h+="<div class=jobcard><div style='display:flex;align-items:center;gap:9px;min-width:0'><span style='width:7px;height:7px;border-radius:50%;background:"+(running?"#fcd34d":"#10b981")+";flex-shrink:0'></span><div style='min-width:0'><div class=jname>"+esc(a.name)+"</div><div class=jmeta style='white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px'>"+status+"</div></div></div></div>";
-  });
-  h+="</div>";
-  if(BOOKS.length)h+="<div class=panel><h3>What it knows</h3>"+BOOKS.map(function(b){return "<div style='margin-bottom:12px'><div style='font-weight:500;font-size:13.5px;margin-bottom:2px'>"+esc(b.project)+"</div><div class=sub>"+esc(b.summary||"—")+"</div></div>";}).join("")+"</div>";
+  return h;
+}
+function feedbackPanel(){
   var fb=DATA.filter(function(r){return r.project==="Platform"});
-  h+="<div class=panel><h3>Feedback</h3><div class=sub style='margin-bottom:10px'>Want something changed about the app? Say it in Chat — it lands here.</div>"+(fb.length?fb.map(itemCard).join(""):"<div class=sub>Nothing logged yet.</div>")+"</div>";
-  el("view").innerHTML=h;
-  updatePushButtonState();
+  var h="<div class=pagetitle>Feedback</div><div class=pagesub>Want something changed about the app? Say it in Chat — it lands here and gets shipped.</div>";
+  h+=fb.length?fb.map(itemCard).join(""):"<div class=empty>Nothing logged yet.</div>";
+  return h;
 }
 var CALDATA=null;
 async function postCal(action,extra){
@@ -691,7 +787,7 @@ el("cap").addEventListener("input",function(){autogrow(this);el("capgo").disable
 el("cap").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();doCapture()}});
 el("micgo").addEventListener("click",function(){startVoice("cap",el("micgo"))});
 el("addgo").addEventListener("click",openAddTask);
-document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;if(TAB==="chat")CHAT_FORCE_BOTTOM=true;renderCurrent()})});
+document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){TAB=t.dataset.tab;if(TAB==="chat")CHAT_FORCE_BOTTOM=true;MORE_VIEW=null;renderCurrent()})});
 el("modal").addEventListener("click",function(e){if(e.target===el("modal"))closeDetail()});
 
 async function post(action,password){
