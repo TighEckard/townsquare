@@ -739,7 +739,23 @@ function sendToChat(id){
 async function doDispatch(id){var b=el("dispbtn");if(b){b.disabled=true;b.textContent="Agent working… (up to a minute)"}var res=await postAct("dispatch",{id:id});await fetchData();if(res&&res.error){toast("Agent could not finish")}else{toast("Agent finished")}openDetail(id)}
 async function doComplete(id){await postAct("complete",{id:id});closeDetail();await fetchData();toast("Marked done")}
 async function doReopen(id){await postAct("reopen",{id:id});closeDetail();await fetchData();toast("Reopened")}
-async function doCapture(){var t=el("cap").value.trim();if(!t)return;el("cap").value="";autogrow(el("cap"));el("capgo").disabled=true;CHAT_FORCE_BOTTOM=true;toast("Captured — sorting…");await postAct("capture",{text:t});await fetchData();setTimeout(async function(){CHAT_FORCE_BOTTOM=true;await fetchData();toast("Sorted")},2600)}
+async function doCapture(){
+  var t=el("cap").value.trim();if(!t)return;
+  el("cap").value="";autogrow(el("cap"));el("capgo").disabled=true;CHAT_FORCE_BOTTOM=true;
+  // Optimistic echo: show the message in the chat INSTANTLY so the app never feels frozen while the
+  // server triages (an LLM call that takes a few seconds). We reconcile with the real row on fetchData.
+  var tmp={id:"tmp"+Date.now(),raw_text:t,title:null,status:"captured",source:"web",created_at:new Date().toISOString(),agent_doable:false,metadata:null};
+  DATA.push(tmp);renderCurrent();
+  postAct("capture",{text:t}).then(function(res){
+    if(!res||res.ok!==true){throw 0;}
+    CHAT_FORCE_BOTTOM=true;fetchData();
+    setTimeout(function(){CHAT_FORCE_BOTTOM=true;fetchData();},3200);
+  }).catch(function(){
+    toast("Couldn't send — tap ↑ to retry");
+    el("cap").value=t;autogrow(el("cap"));el("capgo").disabled=false;
+    fetchData();
+  });
+}
 
 // ---- voice input (records real audio, transcribes server-side via Groq Whisper — same engine Telegram voice notes use) ----
 var activeRecorder=null;
